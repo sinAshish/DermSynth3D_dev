@@ -5,21 +5,25 @@ description = "DermSynth3D: A 3D Dermoscopic Skin Lesion Synthesis Framework"
 authors = ["Ashish Sinha <ashishsinha108@gmail.com>"]
 readme = "README.md"
 license = "GPL-3.0-or-later"
-include = ["README.md", "LICENSE", "requirements.txt"]
+include = ["README.md", "LICENSE", "requirements.txt", "skin3d"]
 packages = [
     { include = "skin3d" },
 ]
 
 
 [tool.poetry.dependencies]
-python = "^3.8,<=3.11"
+python = "^3.8"
 torch = [
-    { version = "^1.12.1", source = "cuda", platform = "!=darwin"},
-    { version = "^1.12.1", source = "cpu", platform = "darwin"},
+    # { version = "1.12.1+cu113",  url="https://download.pytorch.org/whl/cu113/torch-1.12.1%2Bcu113-cp38-cp38-linux_x86_64.whl#sha256=4adf483ac2d047534a7d023f0022bd8694d87627068ad6dddf186cb3273bbfa2", platform = "linux"},
+    { url = "https://download.pytorch.org/whl/cu113/torch-1.12.1%2Bcu113-cp38-cp38-linux_x86_64.whl#sha256=4adf483ac2d047534a7d023f0022bd8694d87627068ad6dddf186cb3273bbfa2", platform = "linux"},
+    #{ url = "https://download.pytorch.org/whl/cpu/torch-1.12.1-cp38-none-macosx_10_9_x86_64.whl#sha256=a8320ba9ad87e80ca5a6a016e46ada4d1ba0c54626e135d99b2129a4541c509d", platform = "darwin"},
+    { version = "1.12.1", source = "pypi", platform = "darwin"},
 ]
 torchvision = [
-    { version = "^0.13.1", source = "cuda", platform = "!=darwin"},
-    { version = "^0.13.1", source = "cpu", platform = "darwin"},
+    # { version = "0.13.1+cu113", source = "torch", platform = "linux"},
+    #{ url = "https://download.pytorch.org/whl/cpu/torchvision-0.13.1-cp38-cp38-macosx_11_0_arm64.whl#sha256=e9a563894f9fa40692e24d1aa58c3ef040450017cfed3598ff9637f404f3fe3b", platform = "darwin"},
+    { url = "https://download.pytorch.org/whl/cu113/torchvision-0.13.1%2Bcu113-cp38-cp38-linux_x86_64.whl#sha256=899cac298d2a7cf6a8ca62d3ede2a7d3f50b86027f8be2d15639baf74da5d8f0", platform = "linux"},
+    { version = "0.13.1", source = "pypi", platform = "darwin"},
 ]
 pytorch-lightning = "^1.7"
 torchmetrics = "^0.11.4"
@@ -45,20 +49,22 @@ fire = "^0.5"
 plyfile = "^1.0"
 Pillow = ">=8.4"
 pytorch3d = [
-  { url = "https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py38_cu113_pyt1121/pytorch3d-0.7.2-cp38-cp38-linux_x86_64.whl", platform = "linux", python = "^3.8" },
-  { url= "https://files.pythonhosted.org/packages/3e/08/a7922922602ee07387e89e27a47e685486af4c27eebe5f2bb254d913771d/pytorch3d-0.7.2-cp38-cp38-macosx_10_9_x86_64.whl", platform = "darwin", python = "^3.8" },
+  { url = "https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py38_cu113_pyt1121/pytorch3d-0.7.2-cp38-cp38-linux_x86_64.whl", platform = "linux"},
+  { version = "0.7.2", source = "pypi", platform = "darwin"},
+  # { url= "https://files.pythonhosted.org/packages/3e/08/a7922922602ee07387e89e27a47e685486af4c27eebe5f2bb254d913771d/pytorch3d-0.7.2-cp38-cp38-macosx_10_9_x86_64.whl", platform = "darwin", python = "^3.8" },
 ]
-# skin3d = { branch="main", source = "skin3d" }
 
 [[tool.poetry.source]]
-name = "cuda"
+name = "torch"
 url = "https://download.pytorch.org/whl/cu113/"
 priority = "explicit"
 
 [[tool.poetry.source]]
-name = "cpu"
-url = "https://download.pytorch.org/whl/cpu/"
+name = "pypi"
+#url = "https://download.pytorch.org/whl/cpu/"
 priority = "primary"
+
+
 
 [[tool.poetry.source]]
 name = "skin3d"

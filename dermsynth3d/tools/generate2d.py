@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 import random
 import trimesh
@@ -7,7 +8,12 @@ import pandas as pd
 from typing import Optional
 from pathlib import Path
 from tqdm import tqdm, trange
+DS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKIN_DIR = os.path.join(DS_DIR, "..", "skin3d")
+sys.path.append(SKIN_DIR)
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 import pytorch3d
 
