@@ -47,12 +47,15 @@ class UVViewMapper:
         self.max_body_dist = self.max_dist_view * body_mask_view
 
         self.padder = TexturePadding(
-            lesion_texture_mask=self.lesion_texture_mask, texture_image=self.teximage
+            lesion_texture_mask=self.lesion_texture_mask,
+            texture_image=self.teximage,
         )
 
     def max_body_distance(self, dist_thresh=0.1):
         body_seam_uvs = self.view_uvs[self.max_body_dist > dist_thresh]
-        body_seam_uvs_image = uv_map_to_pixels(body_seam_uvs, self.texture_img_size)
+        body_seam_uvs_image = uv_map_to_pixels(
+            body_seam_uvs, self.texture_img_size
+        )
 
         return body_seam_uvs_image
 
@@ -64,7 +67,9 @@ class UVViewMapper:
         return body_seams_x, body_seams_y
 
     def texture_pad(self, seam_thresh=0.1, niter=1):
-        body_seams_x, body_seams_y = self.body_seams_xy(dist_thresh=seam_thresh)
+        body_seams_x, body_seams_y = self.body_seams_xy(
+            dist_thresh=seam_thresh
+        )
 
         mask_pad, tex_pad = self.padder.texture_pad(
             body_seams_x, body_seams_y, niter=niter
@@ -103,7 +108,10 @@ class TexturePadding:
                 seams_x, seams_y = np.where(
                     mask_padded[:, :, self.PAD_CHANNEL].squeeze() > 0
                 )
-                mask_padded, texture_padded = self.body_lesion_aware_seam_padding(
+                (
+                    mask_padded,
+                    texture_padded,
+                ) = self.body_lesion_aware_seam_padding(
                     seams_x, seams_y, mask_padded, texture_padded
                 )
 
@@ -156,9 +164,9 @@ class TexturePadding:
             isrgb_patch = img_patch.sum(axis=2) > 0
 
             # Assign to the pad_channel, the mask padding for the lesion.
-            seam_map[(x - 1) : (x + 2), (y - 1) : (y + 2), self.PAD_CHANNEL] = (
-                (1 - isrgb_patch) * (1 - pad_patch)
-            ) + pad_patch
+            seam_map[
+                (x - 1) : (x + 2), (y - 1) : (y + 2), self.PAD_CHANNEL
+            ] = ((1 - isrgb_patch) * (1 - pad_patch)) + pad_patch
 
             lesion_pad_patch = teximage_seams[
                 (x - 1) : (x + 2), (y - 1) : (y + 2), self.LESION_PAD_CHANNEL
@@ -166,20 +174,28 @@ class TexturePadding:
 
             if lesion_pad_patch[1, 1] > 0:
                 seam_map[
-                    (x - 1) : (x + 2), (y - 1) : (y + 2), self.LESION_PAD_CHANNEL
-                ] = ((1 - pad_patch) * (1 - lesion_pad_patch) + lesion_pad_patch) * (
+                    (x - 1) : (x + 2),
+                    (y - 1) : (y + 2),
+                    self.LESION_PAD_CHANNEL,
+                ] = (
+                    (1 - pad_patch) * (1 - lesion_pad_patch) + lesion_pad_patch
+                ) * (
                     1 - mask_patch
                 ) * (
                     (1 - isrgb_patch) * (1 - lesion_pad_patch)
                 ) + lesion_pad_patch
             elif mask_patch[1, 1] > 0:
                 seam_map[
-                    (x - 1) : (x + 2), (y - 1) : (y + 2), self.LESION_PAD_CHANNEL
+                    (x - 1) : (x + 2),
+                    (y - 1) : (y + 2),
+                    self.LESION_PAD_CHANNEL,
                 ] = (1 - mask_patch) * (1 - isrgb_patch)
 
             # If there are some zero rgb values in the patch,
             # this indicates a boundary pixel that should be filled.
-            img_patch_pad = texture_padded[(x - 1) : (x + 2), (y - 1) : (y + 2), :]
+            img_patch_pad = texture_padded[
+                (x - 1) : (x + 2), (y - 1) : (y + 2), :
+            ]
             if np.sum(img_patch_pad == 0) > 0:
                 # Get the RGB components.
                 r = img_patch_pad[:, :, 0]
@@ -265,12 +281,18 @@ def uv_view_to_texture_image_mask(
     for uv_discrete in uv_pixel_coords:
         # Skip over pixels where the face indicates is the background.
         teximage[
-            (img_size - uv_discrete[:, :, 1][mask > 0], uv_discrete[:, :, 0][mask > 0])
+            (
+                img_size - uv_discrete[:, :, 1][mask > 0],
+                uv_discrete[:, :, 0][mask > 0],
+            )
         ] = image_view_highres[mask > 0]
         # Skip over pixels that are not part of the lesion segmentation.
         # i.e., only put pixels for lesion.
         lesion_texture_mask[
-            (img_size - uv_discrete[:, :, 1][seg > 0], uv_discrete[:, :, 0][seg > 0])
+            (
+                img_size - uv_discrete[:, :, 1][seg > 0],
+                uv_discrete[:, :, 0][seg > 0],
+            )
         ] = 1
 
     return teximage, lesion_texture_mask

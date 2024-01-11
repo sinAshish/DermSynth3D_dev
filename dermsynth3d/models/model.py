@@ -16,7 +16,10 @@ from dermsynth3d.utils.anatomy import SimpleAnatomy
 
 class SkinDeepLabV3(nn.Module):
     def __init__(
-        self, multi_head: bool, freeze_backbone: bool, include_anatomy: bool = True
+        self,
+        multi_head: bool,
+        freeze_backbone: bool,
+        include_anatomy: bool = True,
     ):
         super(SkinDeepLabV3, self).__init__()
 
@@ -45,7 +48,9 @@ class SkinDeepLabV3(nn.Module):
         self.n_depth_channels = 0
         # Total number of channels.
         self.n_channels = (
-            self.n_seg_channels + self.n_anatomy_channels + self.n_depth_channels
+            self.n_seg_channels
+            + self.n_anatomy_channels
+            + self.n_depth_channels
         )
 
         if self.multi_head:
@@ -235,7 +240,9 @@ class MeanShift(torch.nn.Conv2d):
         self.weight.data = torch.eye(3).view(3, 3, 1, 1).to(gpu_id) / std.view(
             3, 1, 1, 1
         )
-        self.bias.data = sign * rgb_range * torch.Tensor(rgb_mean).to(gpu_id) / std
+        self.bias.data = (
+            sign * rgb_range * torch.Tensor(rgb_mean).to(gpu_id) / std
+        )
         for p in self.parameters():
             p.requires_grad = False
 
@@ -295,7 +302,9 @@ def faster_rcnn_texture_model(
     )
 
     model.rpn.anchor_generator = anchor_generator
-    model.rpn.head = RPNHead(256, anchor_generator.num_anchors_per_location()[0])
+    model.rpn.head = RPNHead(
+        256, anchor_generator.num_anchors_per_location()[0]
+    )
     # get the number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one

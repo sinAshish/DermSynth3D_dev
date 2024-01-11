@@ -158,7 +158,9 @@ def get_trimesh_attrs(mesh_name):
     center = [0, 0, 0]
     rot_matrix = tf.rotation_matrix(angle, direction, center)
     tri_mesh = tri_mesh.apply_transform(rot_matrix)
-    tri_mesh.apply_transform(tf.rotation_matrix(math.pi, [0, 0, 1], [-1, -1, -1]))
+    tri_mesh.apply_transform(
+        tf.rotation_matrix(math.pi, [0, 0, 1], [-1, -1, -1])
+    )
 
     verts, faces = tri_mesh.vertices, tri_mesh.faces
     uvs = tri_mesh.visual.uv
@@ -200,8 +202,12 @@ def plotly_mesh(verts, faces, vc, mesh_name):
             )
         ]
     )
-    fig.update_layout(scene_aspectmode="manual", scene_aspectratio=dict(x=1, y=1, z=1))
-    fig.update_layout(scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False)))
+    fig.update_layout(
+        scene_aspectmode="manual", scene_aspectratio=dict(x=1, y=1, z=1)
+    )
+    fig.update_layout(
+        scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False))
+    )
     fig.update_layout(scene=dict(zaxis=dict(visible=False)))
     fig.update_layout(scene=dict(camera=dict(up=dict(x=1, y=0, z=1))))
     fig.update_layout(scene=dict(camera=dict(eye=dict(x=-2, y=-2, z=-1))))
@@ -211,7 +217,9 @@ def plotly_mesh(verts, faces, vc, mesh_name):
 
 
 @st.cache_data
-def load_mesh_and_texture(mesh_name, texture_name, num_lesion=1, device="cuda"):
+def load_mesh_and_texture(
+    mesh_name, texture_name, num_lesion=1, device="cuda"
+):
     mesh_path = get_mesh_path(mesh_name)
     texture_path = get_texture_module(texture_name)(mesh_name, num_lesion)
     # glb_mesh = convert_to_glb(mesh_path)
@@ -293,7 +301,9 @@ def setup_renderer(cameras, lights, materials, device="cuda"):
         perspective_correct=True,
     )
     renderer = MeshRenderer(
-        rasterizer=MeshRasterizer(cameras=cameras, raster_settings=raster_settings),
+        rasterizer=MeshRasterizer(
+            cameras=cameras, raster_settings=raster_settings
+        ),
         shader=SoftPhongShader(
             device=device, cameras=cameras, lights=lights, materials=materials
         ),
@@ -302,8 +312,12 @@ def setup_renderer(cameras, lights, materials, device="cuda"):
 
 
 # @st.cache_resource
-def render_images(renderer, mesh, lights, cameras, materials, nviews, device="cuda"):
-    images = renderer(mesh, lights=lights, cameras=cameras, materials=materials)
+def render_images(
+    renderer, mesh, lights, cameras, materials, nviews, device="cuda"
+):
+    images = renderer(
+        mesh, lights=lights, cameras=cameras, materials=materials
+    )
     return images
 
 
@@ -347,13 +361,17 @@ def main():
         )
         with mesh_place and st.spinner("Loading Mesh..."):
             # mesh_place.info("click on reset camera, if unable to see the whole mesh!")
-            mesh_place.plotly_chart(tmesh, use_container_width=True, theme=None)
+            mesh_place.plotly_chart(
+                tmesh, use_container_width=True, theme=None
+            )
             # mesh_place.info("The mesh will be displayed here. Please wait...")
             # st.sidebar.success("Mesh with texture loaded!")
             # stpyvista(tmesh, key="mesh")
         with texture_place and st.spinner("Loading texture..."):
             pl_img = plotly_image(texture_img.resize((512, 512)))
-            texture_place.plotly_chart(pl_img, use_container_width=True, theme=None)
+            texture_place.plotly_chart(
+                pl_img, use_container_width=True, theme=None
+            )
             # texture_place.info("The texture will be displayed here. Please wait...")
             # texture_place.image(
             #     texture_img,
@@ -389,7 +407,9 @@ def main():
                 light_pos, ambient_color, diffuse_color, specular_color
             )
             material_values = setup_materials(shininess, specularity)
-            renderer = setup_renderer(camera_values, light_values, material_values)
+            renderer = setup_renderer(
+                camera_values, light_values, material_values
+            )
             st.session_state["camera_values"] = camera_values
             st.session_state["light_values"] = light_values
             st.session_state["material_values"] = material_values
@@ -419,7 +439,9 @@ def main():
             elev = cam.slider(
                 "Elevation", min_value=-90, max_value=90, value=0, step=10
             )
-            azim = cam.slider("Azimuth", min_value=-90, max_value=90, value=90, step=10)
+            azim = cam.slider(
+                "Azimuth", min_value=-90, max_value=90, value=90, step=10
+            )
             # camera_values = cam.form_submit_button(
             #     "Update Camera Parameters",
             #     on_click=setup_cameras,
@@ -451,16 +473,32 @@ def main():
             # )
             cam.subheader("Lighting Parameters")  # , expanded=False)
             light_pos = cam.slider(
-                "Light Position", min_value=0.0, max_value=1.0, value=0.5, step=0.1
+                "Light Position",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.5,
+                step=0.1,
             )
             light_ac = cam.slider(
-                "Ambient Color", min_value=0.0, max_value=1.0, value=0.5, step=0.1
+                "Ambient Color",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.5,
+                step=0.1,
             )
             light_dc = cam.slider(
-                "Diffuse Color", min_value=0.0, max_value=1.0, value=0.5, step=0.1
+                "Diffuse Color",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.5,
+                step=0.1,
             )
             light_sc = cam.slider(
-                "Specular Color", min_value=0.0, max_value=1.0, value=0.5, step=0.1
+                "Specular Color",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.5,
+                step=0.1,
             )
             # light.form_submit_button("Update Lighting Parameters")
             # light_values = setup_lights(light_pos, light_ac, light_dc, light_sc)
@@ -484,7 +522,11 @@ def main():
                 "Shininess", min_value=0, max_value=100, value=50, step=10
             )
             mat_sc = cam.slider(
-                "Specularity", min_value=0.0, max_value=1.0, value=0.5, step=0.1
+                "Specularity",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.5,
+                step=0.1,
             )
             # mat.form_submit_button("Update Material Parameters")
             # material_values = setup_materials(mat_sh, mat_sc)
@@ -494,9 +536,13 @@ def main():
             # update_button = st.form_submit_button("Update Parameters")
             cam.form_submit_button("Update View Parameters")
             camera_values = setup_cameras(dist, elev, azim)
-            light_values = setup_lights(light_pos, light_ac, light_dc, light_sc)
+            light_values = setup_lights(
+                light_pos, light_ac, light_dc, light_sc
+            )
             material_values = setup_materials(mat_sh, mat_sc)
-            renderer = setup_renderer(camera_values, light_values, material_values)
+            renderer = setup_renderer(
+                camera_values, light_values, material_values
+            )
 
             st.session_state["selected_camera_values"] = camera_values
             st.session_state["selected_light_values"] = light_values
@@ -504,7 +550,9 @@ def main():
             st.session_state["selected_material_values"] = material_values
     # Rendered Views
     st.header("Rendered Views")
-    st.info("The rendered views will be displayed here. Click on the button to render!")
+    st.info(
+        "The rendered views will be displayed here. Click on the button to render!"
+    )
     with st.form("Render Views"):
         number_of_views = st.slider(
             "Number of views to be rendered", 2, 16, 4, 2

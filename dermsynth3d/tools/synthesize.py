@@ -108,9 +108,10 @@ class Synthesize2D:
     def random_paste_foreground(self, min_scale, max_scale):
         pasted_img = None
         masks = None
-        foreground_resized_img, foreground_resized_mask = self.random_resize_foreground(
-            min_scale, max_scale
-        )
+        (
+            foreground_resized_img,
+            foreground_resized_mask,
+        ) = self.random_resize_foreground(min_scale, max_scale)
 
         if foreground_resized_img is not None:
             paste_locs = self.paste_locations(foreground_resized_img.shape)
@@ -141,7 +142,9 @@ class Synthesize2D:
                     "Unable to find location to paste lesion. "
                     "Trying again with a different scale"
                 )
-            pasted_img, masks = self.random_paste_foreground(min_scale, max_scale * 2)
+            pasted_img, masks = self.random_paste_foreground(
+                min_scale, max_scale * 2
+            )
 
             if print_debug:
                 if pasted_img is None:

@@ -43,7 +43,9 @@ def inference_multitask(
             seg_pred = np.moveaxis(seg_pred, 0, -1)
 
             anatomy_pred = out["anatomy"]
-            anatomy_pred = softmax2d(anatomy_pred).cpu().detach().numpy().squeeze()
+            anatomy_pred = (
+                softmax2d(anatomy_pred).cpu().detach().numpy().squeeze()
+            )
 
             if return_values:
                 track_file_ids.append(file_ids)

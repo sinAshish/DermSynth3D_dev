@@ -15,7 +15,11 @@ from albumentations.pytorch import ToTensorV2
 
 from dermsynth3d.utils.utils import get_logger, yaml_loader
 from dermsynth3d.models.model import SkinDeepLabV3
-from dermsynth3d.datasets.datasets import Fitz17KAnnotations, ImageDataset, Ph2Dataset
+from dermsynth3d.datasets.datasets import (
+    Fitz17KAnnotations,
+    ImageDataset,
+    Ph2Dataset,
+)
 from dermsynth3d.utils.colorconstancy import shade_of_gray_cc
 from dermsynth3d.losses.metrics import compute_results, conf_mat_cells
 from inference import inference_multitask
@@ -26,9 +30,12 @@ config = yaml_loader("../configs/multitask.yaml")
 
 # Load the model
 multitask_model = SkinDeepLabV3(
-    multi_head=config["infer"]["multi_head"], freeze_backbone=config["infer"]["freeze"]
+    multi_head=config["infer"]["multi_head"],
+    freeze_backbone=config["infer"]["freeze"],
 )
-multitask_model.load_state_dict(torch.load(config["infer"]["model_path"]), strict=False)
+multitask_model.load_state_dict(
+    torch.load(config["infer"]["model_path"]), strict=False
+)
 
 multitask_model = multitask_model.to(device)
 multitask_model.eval()
@@ -145,7 +152,9 @@ def run_inference(mode, config):
         )
         fitz_test_df = pd.DataFrame(
             compute_results(
-                fitz_test_ds, config["infer"]["fitz_test_skin"], pred_ext=".png"
+                fitz_test_ds,
+                config["infer"]["fitz_test_skin"],
+                pred_ext=".png",
             )
         )
 
@@ -188,7 +197,9 @@ def run_inference(mode, config):
             dir_save_skin_preds=config["infer"]["ph2_test_skin"],
         )
         ph2_test_df = pd.DataFrame(
-            compute_results(ph2_ds, config["infer"]["ph2_test_skin"], pred_ext=".bmp")
+            compute_results(
+                ph2_ds, config["infer"]["ph2_test_skin"], pred_ext=".bmp"
+            )
         )
 
         logger.info(f"Ph2 Dataset Size: {len(ph2_ds)}")
@@ -212,7 +223,9 @@ def run_inference(mode, config):
             dir_save_skin_preds=config["infer"]["derm_preds"],
         )
         dermofit_df = pd.DataFrame(
-            compute_results(dermofit_ds, config["infer"]["derm_preds"], pred_ext=".png")
+            compute_results(
+                dermofit_ds, config["infer"]["derm_preds"], pred_ext=".png"
+            )
         )
 
         logger.info(f"DermoFit Dataset Size: {len(dermofit_ds)}")
@@ -238,7 +251,9 @@ def run_inference(mode, config):
         )
         pratheepan_df = pd.DataFrame(
             compute_results(
-                pratheepan_ds, config["infer"]["prath_preds_skin"], pred_ext=".png"
+                pratheepan_ds,
+                config["infer"]["prath_preds_skin"],
+                pred_ext=".png",
             )
         )
 
@@ -251,11 +266,15 @@ def run_inference(mode, config):
                 pratheepan_df.skin_ji.std(),
             )
         )
-        res = conf_mat_cells(pratheepan_ds, config["infer"]["prath_preds_skin"], ".png")
+        res = conf_mat_cells(
+            pratheepan_ds, config["infer"]["prath_preds_skin"], ".png"
+        )
         tps = res["tps"]
         fps = res["fps"]
         fns = res["fns"]
-        f1 = (2 * np.sum(tps)) / ((2 * np.sum(tps)) + np.sum(fps) + np.sum(fns))
+        f1 = (2 * np.sum(tps)) / (
+            (2 * np.sum(tps)) + np.sum(fps) + np.sum(fns)
+        )
         logger.info("F1 Score: ", f1)
 
 
@@ -272,6 +291,8 @@ if __name__ == "__main__":
     if args.mode is not None:
         config["infer"]["mode"] = args.mode
 
-    logger = get_logger(f'../logs/multitask_eval_{config["infer"]["mode"]}.log')
+    logger = get_logger(
+        f'../logs/multitask_eval_{config["infer"]["mode"]}.log'
+    )
 
     run_inference(config["infer"]["mode"], config)

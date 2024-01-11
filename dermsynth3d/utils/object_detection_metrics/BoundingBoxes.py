@@ -24,7 +24,9 @@ class BoundingBoxes:
     def getBoundingBoxByClass(self, classId):
         boundingBoxes = []
         for d in self._boundingBoxes:
-            if d.getClassId() == classId:  # get only specified bounding box type
+            if (
+                d.getClassId() == classId
+            ):  # get only specified bounding box type
                 boundingBoxes.append(d)
         return boundingBoxes
 
@@ -42,7 +44,9 @@ class BoundingBoxes:
 
     def getBoundingBoxesByImageName(self, imageName):
         # get only specified bb type
-        return [d for d in self._boundingBoxes if d.getImageName() == imageName]
+        return [
+            d for d in self._boundingBoxes if d.getImageName() == imageName
+        ]
 
     def count(self, bbType=None):
         if bbType is None:  # Return all bounding boxes
@@ -64,7 +68,9 @@ class BoundingBoxes:
         bbxes = self.getBoundingBoxesByImageName(imageName)
         for bb in bbxes:
             if bb.getBBType() == BBType.GroundTruth:  # if ground truth
-                image = add_bb_into_image(image, bb, color=(0, 255, 0))  # green
+                image = add_bb_into_image(
+                    image, bb, color=(0, 255, 0)
+                )  # green
             else:  # if detection
                 image = add_bb_into_image(image, bb, color=(255, 0, 0))  # red
         return image

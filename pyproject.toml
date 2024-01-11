@@ -5,19 +5,15 @@ description = "DermSynth3D: A 3D Dermoscopic Skin Lesion Synthesis Framework"
 authors = ["Ashish Sinha <ashishsinha108@gmail.com>"]
 readme = "README.md"
 license = "GPL-3.0-or-later"
-include = ["README.md", "LICENSE", "requirements.txt", "skin3d", "Dockerfilie"]
-
-[[tool.poetry.source]]
-name = "torch"
-url = "https://download.pytorch.org/whl/cu113/"
-priority = "primary"
-
+include = ["README.md", "LICENSE", "requirements.txt"]
+packages = [
+    { include = "skin3d" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8,<=3.11"
-torch = { version = "^1.12", source = "torch"}
-nvidia-cublas-cu11 = "^11.3"
-torchvision = {version = "^0.13", source = "torch"}
+torch = { version = "^1.12", source = "torch" }
+torchvision = {version = "^0.13", source="torchvision" }
 pytorch-lightning = "^1.7"
 torchmetrics = "^0.11.4"
 mediapy = "*"
@@ -41,13 +37,28 @@ scipy = "*"
 fire = "^0.5"
 plyfile = "^1.0"
 Pillow = ">=8.4"
-# skin3d = { git = "https://github.com/jeremykawahara/skin3d.git" }
 pytorch3d = { url = "https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py38_cu113_pyt1121/pytorch3d-0.7.2-cp38-cp38-linux_x86_64.whl" }
+# skin3d = { branch="main", source = "skin3d" }
 
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cu113/"
+priority = "primary"
+
+
+[[tool.poetry.source]]
+name = "torchvision"
+url = "https://download.pytorch.org/whl/cu113/"
+priority = "primary"
+
+[[tool.poetry.source]]
+name = "skin3d"
+url = "https://github.com/jeremykawahara/skin3d.git"
+priority = "supplemental"
 
 [tool.black]
 line-length = 79
 
 [build-system]
-requires = ["poetry-core", "torch==1.12.1+cu113"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

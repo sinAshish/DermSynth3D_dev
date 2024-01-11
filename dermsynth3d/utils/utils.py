@@ -41,7 +41,9 @@ def blend_background(fore_img, back_img, fore_mask, soft_blend=False):
     blend_img = fore_img * fore_mask[:, :, np.newaxis] + background
 
     if soft_blend:
-        soft_mask = cv2.GaussianBlur(fore_mask * 1.0, (5, 5), cv2.BORDER_DEFAULT)
+        soft_mask = cv2.GaussianBlur(
+            fore_mask * 1.0, (5, 5), cv2.BORDER_DEFAULT
+        )
         soft_mask[soft_mask > 0.999] = 1
         blend_img = (blend_img * soft_mask[:, :, np.newaxis]) + (
             1 - soft_mask[:, :, np.newaxis]
@@ -125,7 +127,9 @@ def random_resize_crop_seg_lesion(
 
     resize = (resize_dim_0, resize_dim_1)
     seg_crop_pil = seg_crop_pil.resize(size=resize, resample=Image.NEAREST)
-    lesion_crop_pil = lesion_crop_pil.resize(size=resize, resample=Image.NEAREST)
+    lesion_crop_pil = lesion_crop_pil.resize(
+        size=resize, resample=Image.NEAREST
+    )
     resized_lesion = np.asarray(lesion_crop_pil).astype(np.float32) / 255
     resized_crop = np.asarray(seg_crop_pil).astype(np.float32) / 255
     resized_crop = resized_crop > 0
@@ -205,7 +209,9 @@ class SmoothedValue(object):
         """
         if not is_dist_avail_and_initialized():
             return
-        t = torch.tensor([self.count, self.total], dtype=torch.float64, device="cuda")
+        t = torch.tensor(
+            [self.count, self.total], dtype=torch.float64, device="cuda"
+        )
         dist.barrier()
         dist.all_reduce(t)
         t = t.tolist()
@@ -303,7 +309,9 @@ class MetricLogger(object):
         if attr in self.__dict__:
             return self.__dict__[attr]
         raise AttributeError(
-            "'{}' object has no attribute '{}'".format(type(self).__name__, attr)
+            "'{}' object has no attribute '{}'".format(
+                type(self).__name__, attr
+            )
         )
 
     def __str__(self):

@@ -11,7 +11,9 @@ from dermsynth3d.losses.metrics import dice, precision, recall, jaccard_index
 from dermsynth3d.datasets.datasets import ImageDataset
 
 
-def infer(model, path, logger, test_dataloader, device, real_test_ds, real_paths):
+def infer(
+    model, path, logger, test_dataloader, device, real_test_ds, real_paths
+):
     sigmoid = torch.nn.Sigmoid().to(device)
     # do inference after every best model
     model.eval()
@@ -120,7 +122,9 @@ def evaluate(
 
             file_id = image_ids[0]
             pred_seg = Image.fromarray(out_np)
-            pred_seg = pred_seg.resize(val_dataloader.dataset.image(file_id).size)
+            pred_seg = pred_seg.resize(
+                val_dataloader.dataset.image(file_id).size
+            )
 
             gt_seg = np.asarray(real_val_ds.target(file_id))
             image_res = {}
@@ -182,7 +186,9 @@ def inference_multitask(
             seg_pred = np.moveaxis(seg_pred, 0, -1)
 
             anatomy_pred = out["anatomy"]
-            anatomy_pred = softmax2d(anatomy_pred).cpu().detach().numpy().squeeze()
+            anatomy_pred = (
+                softmax2d(anatomy_pred).cpu().detach().numpy().squeeze()
+            )
 
             if return_values:
                 track_file_ids.append(file_ids)

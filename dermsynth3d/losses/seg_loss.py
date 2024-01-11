@@ -22,7 +22,9 @@ def dice_loss(target, input):
     if (tflat.sum() == 0) and (iflat.sum() < 1):
         return 0
 
-    loss = 1 - ((2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth))
+    loss = 1 - (
+        (2.0 * intersection + smooth) / (iflat.sum() + tflat.sum() + smooth)
+    )
 
     return loss
 

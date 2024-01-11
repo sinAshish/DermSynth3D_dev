@@ -21,8 +21,12 @@ import torchvision.transforms as transforms
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../DermSynth3D")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "../DermSynth3D/skin3d")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.getcwd(), "../DermSynth3D"))
+)
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.getcwd(), "../DermSynth3D/skin3d"))
+)
 
 from dermsynth3d.utils.utils import yaml_loader, get_logger
 from dermsynth3d.datasets.datasets import (
@@ -44,7 +48,9 @@ config = yaml_loader("./configs/train_mix.yaml")
 # create directories for saving the checkpoints
 os.makedirs(config["save_dir"], exist_ok=True)
 if not os.path.exists(os.path.join(config["save_dir"], config["save_name"])):
-    os.makedirs(os.path.join(config["save_dir"], config["save_name"]), exist_ok=True)
+    os.makedirs(
+        os.path.join(config["save_dir"], config["save_name"]), exist_ok=True
+    )
 
 exp_name = f"{sys.argv[1][:-1]}_real{sys.argv[2]}_syn-mode{sys.argv[3]}_lr{config['train']['lr']}_rbr{config['train']['real_batch_ratio']}"
 
@@ -124,7 +130,9 @@ img_augment = A.Compose(
             saturation=(min_v, max_v),
             hue=(-0.025, 0.025),
         ),
-        A.ISONoise(color_shift=(0.01, 0.1), intensity=(0.1, 0.75), always_apply=False),
+        A.ISONoise(
+            color_shift=(0.01, 0.1), intensity=(0.1, 0.75), always_apply=False
+        ),
         A.GaussianBlur(blur_limit=(3, 3)),
         A.ImageCompression(10, 100),
     ]
@@ -214,7 +222,10 @@ elif len(real_ds) == 0:
     real_ds = blend_ds
 
 train_blend_dataloader = DataLoader(
-    blend_ds, batch_size=(batch_size - real_batch_size), shuffle=True, drop_last=True
+    blend_ds,
+    batch_size=(batch_size - real_batch_size),
+    shuffle=True,
+    drop_last=True,
 )
 
 train_real_dataloader = DataLoader(
@@ -222,7 +233,10 @@ train_real_dataloader = DataLoader(
 )
 
 val_dataloader = DataLoader(
-    real_val_ds, batch_size=config["test"]["batch_size"], shuffle=False, drop_last=True
+    real_val_ds,
+    batch_size=config["test"]["batch_size"],
+    shuffle=False,
+    drop_last=True,
 )
 
 test_dataloader = DataLoader(
@@ -323,7 +337,9 @@ def train(config):
 
                 seg_model.eval()
 
-                val_score = evaluate(seg_model, val_dataloader, device, real_val_ds)
+                val_score = evaluate(
+                    seg_model, val_dataloader, device, real_val_ds
+                )
                 val_iou = val_score.iou.mean()
                 val_dice = val_score.dice.mean()
 
@@ -367,7 +383,9 @@ def train(config):
                     logger.info(f"Saving at --> {PATH}")
 
                     logger.info("*********************************")
-                    logger.info(f"[Test with best dice model] iou: {max_test_iou:.4f}")
+                    logger.info(
+                        f"[Test with best dice model] iou: {max_test_iou:.4f}"
+                    )
                     logger.info(
                         f"[Test with best dice model] dice: {max_test_dice:.4f}"
                     )
@@ -394,8 +412,12 @@ def train(config):
                     logger.info(f"Saving at --> {PATH}")
 
                     logger.info("*********************************")
-                    logger.info(f"[Test with best iou model] iou: {max_test_iou:.4f}")
-                    logger.info(f"[Test with best iou model] dice: {max_test_dice:.4f}")
+                    logger.info(
+                        f"[Test with best iou model] iou: {max_test_iou:.4f}"
+                    )
+                    logger.info(
+                        f"[Test with best iou model] dice: {max_test_dice:.4f}"
+                    )
                     logger.info("*********************************")
 
                 seg_model.train()

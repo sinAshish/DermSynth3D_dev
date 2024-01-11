@@ -36,9 +36,9 @@ class Blended3d:
         self.device = device
 
         # This assumes that `mesh_filename` is in the format of 3dBodyTex.v1
-        self.dir_original_mesh = mesh_filename.split("model_highres_0_normalized.obj")[
-            0
-        ]
+        self.dir_original_mesh = mesh_filename.split(
+            "model_highres_0_normalized.obj"
+        )[0]
 
         split_filename = mesh_filename.split("/")
         self.subject_id = split_filename[-2]
@@ -46,7 +46,9 @@ class Blended3d:
         self.texture_name = self.mesh_name.split(".")[0]  # + '.png'
         self.extension = extension
 
-        self.dir_subject = os.path.join(self.dir_blended_textures, self.subject_id)
+        self.dir_subject = os.path.join(
+            self.dir_blended_textures, self.subject_id
+        )
 
         if not os.path.isdir(self.dir_subject):
             # Create the directory for the subject if it does not exist.
@@ -63,25 +65,35 @@ class Blended3d:
         return vertices_to_anatomy
 
     def filepath_lesion_faces_uvs(self):
-        print("***Warning: Function `filepath_lesion_faces_uvs(...)` is depreciated.")
+        print(
+            "***Warning: Function `filepath_lesion_faces_uvs(...)` is depreciated."
+        )
         return os.path.join(
             self.dir_subject, "lesion_faces_uvs_" + self.extension + ".npy"
         )
 
     def save_lesion_faces_uvs(self, uvs_lesion):
-        print("***Warning: Function `save_lesion_faces_uvs(...)` is depreciated.")
+        print(
+            "***Warning: Function `save_lesion_faces_uvs(...)` is depreciated."
+        )
         np.save(self.filepath_lesion_faces_uvs(), uvs_lesion)
 
     def load_lesion_faces_uvs(self):
-        print("***Warning: Function `load_lesion_faces_uvs(...)` is depreciated.")
+        print(
+            "***Warning: Function `load_lesion_faces_uvs(...)` is depreciated."
+        )
         filepath = self.filepath_lesion_faces_uvs()
         uvs_lesion = np.load(filepath)
         return uvs_lesion
 
     def filepath_lesion_texture_mask(self):
-        return os.path.join(self.dir_subject, "lesion_mask_" + self.extension + ".png")
+        return os.path.join(
+            self.dir_subject, "lesion_mask_" + self.extension + ".png"
+        )
 
-    def save_lesion_texture_mask(self, lesion_texture_mask, print_filename=False, filename=None):
+    def save_lesion_texture_mask(
+        self, lesion_texture_mask, print_filename=False, filename=None
+    ):
         """Saves the lesion mask array as a PNG image.
 
         Image saved with a default filename and path.
@@ -123,7 +135,9 @@ class Blended3d:
         return img
 
     def filepath_texture_image(self):
-        fname = os.path.join(self.dir_original_mesh, "model_highres_0_normalized.png")
+        fname = os.path.join(
+            self.dir_original_mesh, "model_highres_0_normalized.png"
+        )
         return fname
 
     def filepath_blended_texture_image(self):
@@ -133,12 +147,14 @@ class Blended3d:
 
     def filepath_pasted_texture_image(self):
         return os.path.join(
-            self.dir_subject, self.texture_name + "_pasted_" + self.extension + ".png"
+            self.dir_subject,
+            self.texture_name + "_pasted_" + self.extension + ".png",
         )
 
     def filepath_dilated_texture_image(self):
         return os.path.join(
-            self.dir_subject, self.texture_name + "_dilated_" + self.extension + ".png"
+            self.dir_subject,
+            self.texture_name + "_dilated_" + self.extension + ".png",
         )
 
     def filepath_dilated_texture_mask(self):
@@ -152,7 +168,9 @@ class Blended3d:
             "model_highres_0_normalized_mask.png",
         )
 
-    def save_dilated_texture_mask(self, dilated_texture_mask, print_filepath=False, filename=None):
+    def save_dilated_texture_mask(
+        self, dilated_texture_mask, print_filepath=False, filename=None
+    ):
         filepath = self.filepath_dilated_texture_mask()
         Image.fromarray(dilated_texture_mask).save(filepath)
 
@@ -161,7 +179,9 @@ class Blended3d:
         if filename is not None:
             Image.fromarray(dilated_texture_mask).save(filename)
 
-    def save_dilated_texture_image(self, dilated_texture_image, print_filepath=False, filename=None):
+    def save_dilated_texture_image(
+        self, dilated_texture_image, print_filepath=False, filename=None
+    ):
         filepath = self.filepath_dilated_texture_image()
         Image.fromarray(dilated_texture_image).save(filepath)
 
@@ -170,8 +190,9 @@ class Blended3d:
         if filename is not None:
             Image.fromarray(dilated_texture_image).save(filename)
 
-
-    def save_pasted_texture_image(self, pasted_texture_image, print_filepath=False, filename=None):
+    def save_pasted_texture_image(
+        self, pasted_texture_image, print_filepath=False, filename=None
+    ):
         filepath = self.filepath_pasted_texture_image()
         Image.fromarray(pasted_texture_image).save(filepath)
 
@@ -187,7 +208,9 @@ class Blended3d:
 
         return img
 
-    def save_blended_texture_image(self, blended_texture_image, print_filename=False, filename=None):
+    def save_blended_texture_image(
+        self, blended_texture_image, print_filename=False, filename=None
+    ):
         """Saves the texture image with a default filename and path.
 
         Args:

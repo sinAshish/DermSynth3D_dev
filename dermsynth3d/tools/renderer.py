@@ -244,7 +244,9 @@ class MeshRendererPyTorch3D:
         elif surface_offset_weight is not None:
             # Choose a random face.
             if face_idx is None:
-                face_idx = np.random.randint(0, self.center_face_vertices.shape[0])
+                face_idx = np.random.randint(
+                    0, self.center_face_vertices.shape[0]
+                )
 
             b = surface_offset_weight[1]
             a = surface_offset_weight[0]
@@ -273,7 +275,9 @@ class MeshRendererPyTorch3D:
 
         # Randomize lighting.
         ambient = [np.round(random.uniform(ambients[0], ambients[1]), 2)] * 3
-        specular = [np.round(random.uniform(speculars[0], speculars[1]), 2)] * 3
+        specular = [
+            np.round(random.uniform(speculars[0], speculars[1]), 2)
+        ] * 3
         diffuse = [np.round(random.uniform(diffuses[0], diffuses[1]), 2)] * 3
         shininess = np.round(random.uniform(shininess[0], shininess[1]), 2)
 
@@ -283,7 +287,9 @@ class MeshRendererPyTorch3D:
             ambient, specular, diffuse, light_location=light_location
         )
 
-        self.precompute_material_parameters(ambient, specular, diffuse, shininess)
+        self.precompute_material_parameters(
+            ambient, specular, diffuse, shininess
+        )
 
         self.params = {
             "dist": dist,
@@ -359,7 +365,9 @@ class MeshRendererPyTorch3D:
 
     def compute_fragments(self):
         if self.cameras is None:
-            raise ValueError("Error: call `self.precompute_view_parameters(...) first.")
+            raise ValueError(
+                "Error: call `self.precompute_view_parameters(...) first."
+            )
 
         self.rasterizer = MeshRasterizer(
             cameras=self.cameras, raster_settings=self.raster_settings
@@ -500,7 +508,9 @@ class MeshRendererPyTorch3D:
         Return the indexes of the faces that contain skin.
         """
         if self.nonskin_face_indexes is None:
-            raise ValueError("Error: `self.nonskin_face_indexes must be set first.")
+            raise ValueError(
+                "Error: `self.nonskin_face_indexes must be set first."
+            )
         all_face_indexes = set(np.arange(0, self.mesh.faces_packed().shape[0]))
         skin_face_indexes = all_face_indexes - self.nonskin_face_indexes
 
@@ -512,7 +522,10 @@ class MeshRendererPyTorch3D:
         """
         skin_mask = self.skin_mask()
         overlap_with_skin = window_overlap_mask(
-            skin_mask, window_size=window_size, pad_value=0, output_type="all_ones"
+            skin_mask,
+            window_size=window_size,
+            pad_value=0,
+            output_type="all_ones",
         )
 
         return overlap_with_skin
@@ -582,7 +595,9 @@ class MeshRendererPyTorch3D:
         uvs_of_faces = self.mesh.textures.verts_uvs_padded().squeeze()[
             self.mesh.textures.faces_uvs_padded().squeeze()
         ]
-        texture_coords_of_faces = uvs_of_faces * nonskin_texture_mask_tensor.shape[0]
+        texture_coords_of_faces = (
+            uvs_of_faces * nonskin_texture_mask_tensor.shape[0]
+        )
         texture_coords_of_faces = (
             texture_coords_of_faces.cpu().numpy().round().astype(np.int32)
         )
@@ -590,7 +605,9 @@ class MeshRendererPyTorch3D:
         img_size = nonskin_texture_mask_tensor.shape[:2]
         mask_texture_recon = np.zeros(shape=img_size)
         nonskin_mask = nonskin_texture_mask_tensor.cpu().detach().numpy()
-        is_face_skin = np.ones(shape=len(texture_coords_of_faces), dtype=np.int32)
+        is_face_skin = np.ones(
+            shape=len(texture_coords_of_faces), dtype=np.int32
+        )
         for idx, coords in enumerate(texture_coords_of_faces):
             skin_coord = 1
             for coord in coords:

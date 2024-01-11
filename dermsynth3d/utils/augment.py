@@ -10,7 +10,9 @@ class ColorConstancyGray(A.core.transforms_interface.ImageOnlyTransform):
         always_apply=False,
         p=0.5,
     ):
-        super(ColorConstancyGray, self).__init__(always_apply=always_apply, p=p)
+        super(ColorConstancyGray, self).__init__(
+            always_apply=always_apply, p=p
+        )
 
     def apply(self, img, **params):
         return shade_of_gray_cc(img)
@@ -66,7 +68,10 @@ class ResizeInterpolate(A.core.transforms_interface.DualTransform):
             interpolation = random.choice(interpolations)
 
         return A.augmentations.geometric.functional.resize(
-            img, height=self.height, width=self.width, interpolation=interpolation
+            img,
+            height=self.height,
+            width=self.width,
+            interpolation=interpolation,
         )
 
     def apply_to_bbox(self, bbox, **params):

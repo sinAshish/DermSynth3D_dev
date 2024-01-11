@@ -131,7 +131,9 @@ class Evaluator:
                     det2[dects[d][0]][jmax] = 1  # flag as already 'seen'
                 # Assign detection as true positive/don't care/false positive
                 # if `decision_func` is not specified, defaults to: (iouMax >= IOUThreshold)
-                if jmax is not None and (decision_func(dects[d][3], gt[jmax][3])):
+                if jmax is not None and (
+                    decision_func(dects[d][3], gt[jmax][3])
+                ):
                     if det[dects[d][0]][jmax] == 0:
                         TP[d] = 1  # count as true positive
                         det[dects[d][0]][jmax] = 1  # flag as already 'seen'
@@ -152,9 +154,13 @@ class Evaluator:
             iou = acc_IoU / npos
             # Depending on the method, call the right implementation
             if method == MethodAveragePrecision.EveryPointInterpolation:
-                [ap, mpre, mrec, ii] = Evaluator.CalculateAveragePrecision(rec, prec)
+                [ap, mpre, mrec, ii] = Evaluator.CalculateAveragePrecision(
+                    rec, prec
+                )
             else:
-                [ap, mpre, mrec, _] = Evaluator.ElevenPointInterpolatedAP(rec, prec)
+                [ap, mpre, mrec, _] = Evaluator.ElevenPointInterpolatedAP(
+                    rec, prec
+                )
             # add class result in the dictionary to be returned
             r = {
                 "class": c,
@@ -233,7 +239,10 @@ class Evaluator:
             if showInterpolatedPrecision:
                 if method == MethodAveragePrecision.EveryPointInterpolation:
                     plt.plot(
-                        mrec, mpre, "--r", label="Interpolated precision (every point)"
+                        mrec,
+                        mpre,
+                        "--r",
+                        label="Interpolated precision (every point)",
                     )
                 elif method == MethodAveragePrecision.ElevenPointInterpolation:
                     # Uncomment the line below if you want to plot the area
@@ -247,7 +256,12 @@ class Evaluator:
                             idxEq = np.argwhere(mrec == r)
                             nrec.append(r)
                             nprec.append(max([mpre[int(id)] for id in idxEq]))
-                    plt.plot(nrec, nprec, "or", label="11-point interpolated precision")
+                    plt.plot(
+                        nrec,
+                        nprec,
+                        "or",
+                        label="11-point interpolated precision",
+                    )
             plt.plot(recall, precision, label="Precision")
             plt.xlabel("recall")
             plt.ylabel("precision")
@@ -259,7 +273,9 @@ class Evaluator:
                     % (str(classId), ap_str)
                 )
             else:
-                plt.title("Precision x Recall curve \nClass: %s" % str(classId))
+                plt.title(
+                    "Precision x Recall curve \nClass: %s" % str(classId)
+                )
             plt.legend(shadow=True)
             plt.grid()
             ############################################################

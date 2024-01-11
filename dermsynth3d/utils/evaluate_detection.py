@@ -1,6 +1,8 @@
 import torch
 from dermsynth3d.utils.object_detection_metrics.BoundingBox import BoundingBox
-from dermsynth3d.utils.object_detection_metrics.BoundingBoxes import BoundingBoxes
+from dermsynth3d.utils.object_detection_metrics.BoundingBoxes import (
+    BoundingBoxes,
+)
 from dermsynth3d.utils.object_detection_metrics.utils import (
     BBFormat,
     BBType,
@@ -66,7 +68,12 @@ def get_results(scan_id, predicted_boxes, predicted_scores, gt_boxes):
 
 
 def sample_results(
-    predicted_boxes, predicted_scores, gt_boxes, scan_id, decision_func, iou_thresh
+    predicted_boxes,
+    predicted_scores,
+    gt_boxes,
+    scan_id,
+    decision_func,
+    iou_thresh,
 ):
     # Bounding boxes with a confidence threshold >= 0.5
     bounding_boxes_thresh = convert_to_bounding_boxes(

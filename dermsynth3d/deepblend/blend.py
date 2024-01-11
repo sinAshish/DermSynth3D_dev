@@ -25,7 +25,11 @@ from dermsynth3d.losses.deepblend_loss import (
     style_gram_loss,
 )
 from dermsynth3d.utils.textures import UVViewMapper
-from dermsynth3d.utils.image import simple_augment, float_img_to_uint8, uint8_to_float32
+from dermsynth3d.utils.image import (
+    simple_augment,
+    float_img_to_uint8,
+    uint8_to_float32,
+)
 from dermsynth3d.tools.renderer import (
     camera_pos_from_normal,
 )
@@ -38,7 +42,9 @@ def texture_mask_of_lesion_mask_id(texture_mask, lesion_mask_id: int, device):
     )
     return lesion_id_texture_mask
 
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 class PasteTextureImage:
     """
@@ -126,14 +132,18 @@ class PasteTextureImage:
         # So if the sum < 3, then is a skin pixel.
         samples_is_skin = sample_textures.sum(axis=1) < 3
         # Randomly permute the skin indexes - likely not necessary as these are already sampled.
-        self.sample_skin_indexes = np.random.permutation(np.where(samples_is_skin)[0])
+        self.sample_skin_indexes = np.random.permutation(
+            np.where(samples_is_skin)[0]
+        )
 
         # Spatial coordinates of the surface of the mesh.
         self.sample_coords = coords.cpu().detach().numpy().squeeze()
         # Normals corresponding to the surface points.
         self.sample_normals = normals.cpu().detach().numpy().squeeze()
 
-    def paste_on_texture(self, img, mask, mask_id: int, depth_diff_thresh=0.02):
+    def paste_on_texture(
+        self, img, mask, mask_id: int, depth_diff_thresh=0.02
+    ):
         self.max_depth_diff = None
         self.mask_id = None
 
@@ -146,8 +156,10 @@ class PasteTextureImage:
 
         accepted = self.paste_masks_and_texture_images(mask_id)
         if not accepted:
-            return "Skipping sample {} as overlaps with existing lesion.".format(
-                self.sample_counter
+            return (
+                "Skipping sample {} as overlaps with existing lesion.".format(
+                    self.sample_counter
+                )
             )
 
         self.max_depth_diff = max_depth_diff
@@ -155,7 +167,9 @@ class PasteTextureImage:
         return None
 
     def original_view(self):
-        self.mesh_renderer.set_texture_image(self.original_texture_image_tensor)
+        self.mesh_renderer.set_texture_image(
+            self.original_texture_image_tensor
+        )
         view2d = self.mesh_renderer.render_view(asnumpy=True, asRGB=True)
         return view2d
 
@@ -254,7 +268,8 @@ class PasteTextureImage:
 
     def initialize_pasted_masks_and_textures(self):
         self.original_texture_np = np.asarray(
-            self.original_texture_image_tensor.cpu().detach() * 255, dtype=np.uint8
+            self.original_texture_image_tensor.cpu().detach() * 255,
+            dtype=np.uint8,
         )
         self.pasted_texture = self.original_texture_np.copy()
         self.pasted_dilated_texture = self.original_texture_np.copy()
@@ -278,11 +293,14 @@ class PasteTextureImage:
             lesion_mask_view=self.blend_dilated.view_seg(),
             texture_img_size=4096,
         )
-        mask_pad4_dilated, tex_pad4_dilated = uv_view_mapper_dilated.texture_pad(
-            seam_thresh=0.1, niter=4
-        )
+        (
+            mask_pad4_dilated,
+            tex_pad4_dilated,
+        ) = uv_view_mapper_dilated.texture_pad(seam_thresh=0.1, niter=4)
 
-        partial_pad_pasted_texture = np.asarray(tex_pad4_dilated * 255, dtype=np.uint8)
+        partial_pad_pasted_texture = np.asarray(
+            tex_pad4_dilated * 255, dtype=np.uint8
+        )
 
         partial_lesion_pad_mask_dilated = (
             uv_view_mapper_dilated.padder.padded_lesion_mask(mask_pad4_dilated)
@@ -296,7 +314,9 @@ class PasteTextureImage:
             partial_pad_pasted_texture * partial_lesion_pad_mask_dilated
         ) + (self.pasted_dilated_texture * ~partial_lesion_pad_mask_dilated)
 
-        self.lesion_dilated_mask[partial_lesion_pad_mask_dilated] = lesion_mask_id
+        self.lesion_dilated_mask[
+            partial_lesion_pad_mask_dilated
+        ] = lesion_mask_id
 
         uv_view_mapper = UVViewMapper(
             view_uvs=self.mesh_renderer.view_uvs(),
@@ -306,12 +326,16 @@ class PasteTextureImage:
             texture_img_size=4096,
         )
 
-        mask_pad4, tex_pad4 = uv_view_mapper.texture_pad(seam_thresh=0.1, niter=4)
-        partial_pasted_texture = np.asarray(tex_pad4 * 255, dtype=np.uint8)
-        partial_pasted_lesion_mask = uv_view_mapper.padder.padded_lesion_mask(mask_pad4)
-        self.pasted_texture = (partial_pasted_texture * partial_pasted_lesion_mask) + (
-            self.pasted_texture * ~partial_pasted_lesion_mask
+        mask_pad4, tex_pad4 = uv_view_mapper.texture_pad(
+            seam_thresh=0.1, niter=4
         )
+        partial_pasted_texture = np.asarray(tex_pad4 * 255, dtype=np.uint8)
+        partial_pasted_lesion_mask = uv_view_mapper.padder.padded_lesion_mask(
+            mask_pad4
+        )
+        self.pasted_texture = (
+            partial_pasted_texture * partial_pasted_lesion_mask
+        ) + (self.pasted_texture * ~partial_pasted_lesion_mask)
         self.lesion_mask[partial_pasted_lesion_mask] = lesion_mask_id
         return True
 
@@ -334,17 +358,27 @@ class DeepTextureBlend3d:
             self.view_size = (512, 512)
 
         # Original texture image.
-        self.original_texture = self.blended3d.texture_image(astensor=True).to(self.device)
+        self.original_texture = self.blended3d.texture_image(astensor=True).to(
+            self.device
+        )
         # Mask for the texture image.
-        self.texture_mask = self.blended3d.lesion_texture_mask(astensor=True).to(self.device)
+        self.texture_mask = self.blended3d.lesion_texture_mask(
+            astensor=True
+        ).to(self.device)
         # Pasted lesion on the texture image.
-        self.pasted_texture = self.blended3d.pasted_texture_image(astensor=True).to(self.device)
+        self.pasted_texture = self.blended3d.pasted_texture_image(
+            astensor=True
+        ).to(self.device)
         # Lesion with expanded borders on the texture image.
-        self.dilated_texture = self.blended3d.dilated_texture_image(astensor=True).to(self.device)
+        self.dilated_texture = self.blended3d.dilated_texture_image(
+            astensor=True
+        ).to(self.device)
 
         # This is the texture image we are blending on.
         # Load once so can blend multiple lesions.
-        self.texture_image = self.pasted_texture.clone().detach().contiguous().to(self.device)
+        self.texture_image = (
+            self.pasted_texture.clone().detach().contiguous().to(self.device)
+        )
         self.texture_image.requires_grad = True
 
     def set_params(self, params):
@@ -452,13 +486,14 @@ class DeepTextureBlend3d:
 
         # Clamp to acceptable range.
         self.texture_image.data.clamp_(0, 1)
-        blended_texture_np = (self.texture_image.detach().cpu().numpy() * 255).astype(
-            np.uint8
-        )
+        blended_texture_np = (
+            self.texture_image.detach().cpu().numpy() * 255
+        ).astype(np.uint8)
 
         # Mask of the lesions.
         texture_mask_np = (
-            np.asarray(self.texture_mask.cpu().detach()[:, :, np.newaxis]) * 255
+            np.asarray(self.texture_mask.cpu().detach()[:, :, np.newaxis])
+            * 255
         )
 
         params_df = self.blended3d.lesion_params()
@@ -498,7 +533,9 @@ class DeepTextureBlend3d:
             )
 
             # Set to the blended texture image.
-            self.mesh_renderer.set_texture_image(texture_image=self.texture_image)
+            self.mesh_renderer.set_texture_image(
+                texture_image=self.texture_image
+            )
 
             # Blended image.
             img = self.mesh_renderer.render_view(asnumpy=True, asRGB=True)
@@ -512,10 +549,14 @@ class DeepTextureBlend3d:
             self.mesh_renderer.set_texture_image(
                 texture_image=lesion_id_texture_mask[:, :, np.newaxis]
             )
-            mask2d = self.mesh_renderer.render_lesion_mask(asnumpy=True, asRGB=True)
+            mask2d = self.mesh_renderer.render_lesion_mask(
+                asnumpy=True, asRGB=True
+            )
 
             # Remove background on mask.
-            lesion_mask = mask2d * self.mesh_renderer.body_mask()[:, :, np.newaxis]
+            lesion_mask = (
+                mask2d * self.mesh_renderer.body_mask()[:, :, np.newaxis]
+            )
             lesion_mask = (lesion_mask[:, :, 0] > 0.5) * 1
 
             # Pad if across seams.
@@ -526,7 +567,9 @@ class DeepTextureBlend3d:
                 lesion_mask_view=lesion_mask,
                 texture_img_size=4096,
             )
-            mask_pad4, tex_pad4 = uv_view_mapper.texture_pad(seam_thresh=0.1, niter=4)
+            mask_pad4, tex_pad4 = uv_view_mapper.texture_pad(
+                seam_thresh=0.1, niter=4
+            )
             lesion_pad_channel = uv_view_mapper.padder.LESION_PAD_CHANNEL
             padded_blended_texture = np.asarray(tex_pad4 * 255, dtype=np.uint8)
             lesion_pad_mask = mask_pad4[:, :, lesion_pad_channel] == 1
@@ -644,7 +687,9 @@ class DeepImageBlend:
         original_img_tensor,
     ):
         blend_features_style = self.model(self.normalize(composite_img_tensor))
-        original_features_style = self.model(self.normalize(original_img_tensor))
+        original_features_style = self.model(
+            self.normalize(original_img_tensor)
+        )
 
         # Assumes VGG features.
         style_loss = style_gram_loss(
@@ -753,11 +798,15 @@ def paste_blend(
     img_blend = canvas.copy()
     target_region = canvas[
         x_range_start:x_range_end,
-        int(y_start - mask.shape[1] * 0.5) : int(y_start + mask.shape[1] * 0.5),
+        int(y_start - mask.shape[1] * 0.5) : int(
+            y_start + mask.shape[1] * 0.5
+        ),
     ]
     img_blend[
         x_range_start:x_range_end,
-        int(y_start - mask.shape[1] * 0.5) : int(y_start + mask.shape[1] * 0.5),
+        int(y_start - mask.shape[1] * 0.5) : int(
+            y_start + mask.shape[1] * 0.5
+        ),
     ] = (mask * img) + (~mask * target_region)
 
     return img_blend
@@ -789,8 +838,8 @@ def blend_gradients(background_img, foreground_img, mask, gpu_id=0):
             Each tensor is of shape H x W.
     """
 
-    paste_tensor = numpy2tensor(foreground_img, gpu_id = device)
-    img_tensor = numpy2tensor(background_img, gpu_id = device)
+    paste_tensor = numpy2tensor(foreground_img, gpu_id=device)
+    img_tensor = numpy2tensor(background_img, gpu_id=device)
 
     img_gradient = laplacian_filter_tensor(img_tensor, gpu_id=device)
     img_r_grad = img_gradient[0].squeeze().cpu().detach().numpy()
@@ -806,9 +855,9 @@ def blend_gradients(background_img, foreground_img, mask, gpu_id=0):
     g_grad_mod = dilated_g_grad * mask + img_g_grad * (1 - mask)
     b_grad_mod = dilated_b_grad * mask + img_b_grad * (1 - mask)
     rgb_gradient = [
-        numpy2tensor(r_grad_mod, gpu_id = device),
-        numpy2tensor(g_grad_mod, gpu_id = device),
-        numpy2tensor(b_grad_mod, gpu_id = device),
+        numpy2tensor(r_grad_mod, gpu_id=device),
+        numpy2tensor(g_grad_mod, gpu_id=device),
+        numpy2tensor(b_grad_mod, gpu_id=device),
     ]
 
     return rgb_gradient
@@ -832,15 +881,21 @@ def render_views_with_textures(
     mesh_renderer.set_texture_image(texture_image=texture_image)
     # False for tensor.
     blended_images = mesh_renderer.render_view(asnumpy=False)
-    blended_img_tensor = blended_images[:, ..., :3].transpose(1, 3).transpose(2, 3)
+    blended_img_tensor = (
+        blended_images[:, ..., :3].transpose(1, 3).transpose(2, 3)
+    )
 
     # Lesion mask.
-    mesh_renderer.set_texture_image(texture_image=texture_mask[:, :, np.newaxis])
+    mesh_renderer.set_texture_image(
+        texture_image=texture_mask[:, :, np.newaxis]
+    )
     mask2d = mesh_renderer.render_view(asnumpy=True, asRGB=True)
     # lesion_mask = mesh_renderer.lesion_mask(mask2d[:, :, 0], lesion_mask_id)
     lesion_mask = mask2d * mesh_renderer.body_mask()[:, :, np.newaxis]
     lesion_mask = (lesion_mask[:, :, 0] > 0.5) * 1
-    lesion_mask_tensor = numpy2tensor(lesion_mask[:, :, np.newaxis], gpu_id=device)
+    lesion_mask_tensor = numpy2tensor(
+        lesion_mask[:, :, np.newaxis], gpu_id=device
+    )
     xmin, xmax, ymin, ymax = mask2boundingbox(lesion_mask > 0.5, pad=pad)
 
     if xmin < 0:

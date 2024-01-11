@@ -10,7 +10,8 @@ import torch.nn.functional as F
 
 def same_pad_tensor(x: torch.Tensor, kernel_size: np.array, value: int):
     conv_padding = reduce(
-        __add__, [(k // 2 + (k - 2 * (k // 2)) - 1, k // 2) for k in kernel_size[::-1]]
+        __add__,
+        [(k // 2 + (k - 2 * (k // 2)) - 1, k // 2) for k in kernel_size[::-1]],
     )
 
     x_padd = F.pad(x, conv_padding, value=value)
@@ -27,7 +28,9 @@ def window_overlap_mask(
     Pad the mask at the borders to maintain original size.
     Where the `window_size` has all 1's in the `mask`.
     """
-    pad_mask = same_pad_tensor(torch.Tensor(mask), window_size, value=pad_value)
+    pad_mask = same_pad_tensor(
+        torch.Tensor(mask), window_size, value=pad_value
+    )
 
     avg_pool = torch.nn.AvgPool2d(window_size, stride=(1, 1))
     overlap = avg_pool(pad_mask[np.newaxis, :, :])
@@ -54,7 +57,7 @@ def max_value_in_window(img, window_size, pad_value=-1):
 
 def pil_to_tensor(img: PIL.Image.Image):
     img_np = (np.asarray(img) / 255).astype(np.float32)
-    img_tensor = torch.tensor(img_np, dtype=torch.float32)#.cuda()
+    img_tensor = torch.tensor(img_np, dtype=torch.float32)  # .cuda()
     return img_tensor
 
 
@@ -95,9 +98,9 @@ def augmented_predictions(
     for _ in np.arange(num_augmentations):
         # aug = spatial_augment(image=test_img)
         aug = img_augment_func(image=test_img)
-        pred_out = seg_model(img_transform_func(aug["image"])[None, :].to(device))[
-            "out"
-        ]
+        pred_out = seg_model(
+            img_transform_func(aug["image"])[None, :].to(device)
+        )["out"]
         pred_out = softmax2d(pred_out)
         preds_out.append(pred_out.cpu().detach().numpy())
 

@@ -15,7 +15,9 @@ def style_gram_loss(target_features_style, blend_features_style, loss_func):
 
     style_loss = 0
     for layer in range(len(blend_gram_style)):
-        style_loss += loss_func(blend_gram_style[layer], target_gram_style[layer])
+        style_loss += loss_func(
+            blend_gram_style[layer], target_gram_style[layer]
+        )
 
     style_loss /= len(blend_gram_style)
     return style_loss
@@ -26,9 +28,13 @@ def total_variation_loss(blend_img_tensor):
     Compute TV Reg Loss
     """
     tv_loss = torch.sum(
-        torch.abs(blend_img_tensor[:, :, :, :-1] - blend_img_tensor[:, :, :, 1:])
+        torch.abs(
+            blend_img_tensor[:, :, :, :-1] - blend_img_tensor[:, :, :, 1:]
+        )
     ) + torch.sum(
-        torch.abs(blend_img_tensor[:, :, :-1, :] - blend_img_tensor[:, :, 1:, :])
+        torch.abs(
+            blend_img_tensor[:, :, :-1, :] - blend_img_tensor[:, :, 1:, :]
+        )
     )
     return tv_loss
 

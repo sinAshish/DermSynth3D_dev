@@ -70,7 +70,9 @@ class Generate2DHelper:
         )
 
         # Load the mesh using trimesh.
-        self.mesh_tri = trimesh.load(mesh_filename, process=False, maintain_order=True)
+        self.mesh_tri = trimesh.load(
+            mesh_filename, process=False, maintain_order=True
+        )
 
         self.blended3d = Blended3d(
             mesh_filename=mesh_filename,
@@ -90,7 +92,9 @@ class Generate2DHelper:
                 astensor=True
             ).to(self.device)
 
-        self.texture_lesion_mask = self.blended3d.lesion_texture_mask(astensor=True).to(self.device)
+        self.texture_lesion_mask = self.blended3d.lesion_texture_mask(
+            astensor=True
+        ).to(self.device)
         self.nonskin_texture_mask_tensor = self.blended3d.nonskin_texture_mask(
             astensor=True
         ).to(self.device)
@@ -104,9 +108,13 @@ class Generate2DHelper:
             scan_id = self.blended3d.subject_id[:3]
             # if a bodytex annotation from skin3d does not exist
             # then cannot continue to get the nevi annotations in skin3d
-            self.nevi_exists = os.path.exists(self.bodytex.annotation_filepath(scan_id))
+            self.nevi_exists = os.path.exists(
+                self.bodytex.annotation_filepath(scan_id)
+            )
             if not self.nevi_exists:
-                raise ValueError("Missing Bodytex annotations for creating GT Nevi")
+                raise ValueError(
+                    "Missing Bodytex annotations for creating GT Nevi"
+                )
 
             self.texture_nevi_mask = np.zeros(
                 shape=self.texture_lesion_mask.shape, dtype=np.float32
@@ -211,14 +219,20 @@ class Generate2DHelper:
         return paste_img, target
 
     def render_anatomy_image(self):
-        anatomy_image = self.mesh_renderer.anatomy_image(self.vertices_to_anatomy)
+        anatomy_image = self.mesh_renderer.anatomy_image(
+            self.vertices_to_anatomy
+        )
         return anatomy_image
 
-    def composite_image(self, paste_lesion=True, soft_mask=True, min_fraction_lesion=0):
+    def composite_image(
+        self, paste_lesion=True, soft_mask=True, min_fraction_lesion=0
+    ):
         if (min_fraction_lesion < 0) or (min_fraction_lesion > 1):
             raise ValueError("`min_fraction_lesion` must be between 0 and 1.")
 
-        back_img, background_id = self.background_image(view_size = self.view_size)
+        back_img, background_id = self.background_image(
+            view_size=self.view_size
+        )
         self.background_id = background_id
 
         skin_mask = self.render_skin_mask()
@@ -272,7 +286,9 @@ class Generate2DHelper:
             paste_mask = make_masks(lesion_mask, skin_mask)
             self.paste_lesion_id = None
 
-        if paste_mask[:, :, Target.LESION].sum() < (n_pixels * min_fraction_lesion):
+        if paste_mask[:, :, Target.LESION].sum() < (
+            n_pixels * min_fraction_lesion
+        ):
             if self.debug:
                 print("***Not enough lesion.")
             return None, None
@@ -295,7 +311,9 @@ class Generate2DHelper:
         return back_img, background_id
 
     def random_face_idx(self):
-        return np.random.randint(0, self.mesh_renderer.center_face_vertices.shape[0])
+        return np.random.randint(
+            0, self.mesh_renderer.center_face_vertices.shape[0]
+        )
 
     def random_light_pos(self, camera_pos, look_at):
         signed_pos = np.sign(camera_pos - look_at) * 2
@@ -336,9 +354,15 @@ class Generate2DHelper:
             surface_offset_bounds = eval(
                 config["generate"]["random"]["surface_offset_bounds"]
             )
-            ambient_bounds = eval(config["generate"]["random"]["ambient_bounds"])
-            specular_bounds = eval(config["generate"]["random"]["specular_bounds"])
-            diffuse_bounds = eval(config["generate"]["random"]["diffuse_bounds"])
+            ambient_bounds = eval(
+                config["generate"]["random"]["ambient_bounds"]
+            )
+            specular_bounds = eval(
+                config["generate"]["random"]["specular_bounds"]
+            )
+            diffuse_bounds = eval(
+                config["generate"]["random"]["diffuse_bounds"]
+            )
             mat_diffuse_bounds = eval(
                 config["generate"]["random"]["mat_diffuse_bounds"]
             )
@@ -421,13 +445,19 @@ class Generate2DHelper:
 
         self.light_pos = light_pos
         if self.light_pos is None or self.light_pos == "None":
-            self.light_pos = self.random_light_pos(self.camera_pos, self.look_at)
+            self.light_pos = self.random_light_pos(
+                self.camera_pos, self.look_at
+            )
 
         normal = normalize([self.camera_pos - self.look_at])[0]
-        if self.mesh_intersects(self.camera_pos + normal * 0.01, self.light_pos):
+        if self.mesh_intersects(
+            self.camera_pos + normal * 0.01, self.light_pos
+        ):
             # if self.mesh_intersects(self.look_at + self.normal_weight*0.01, self.light_pos):
             if self.debug:
-                print("Lighting blocked by mesh. Setting lighting to camera pos.")
+                print(
+                    "Lighting blocked by mesh. Setting lighting to camera pos."
+                )
             self.light_pos = self.camera_pos
 
         self.ambient = self.random_light_color(*ambient_bounds)
@@ -477,7 +507,8 @@ class Generate2DHelper:
 
     def mesh_intersects(self, source_point, target_point):
         is_intersect = self.ray.intersects_any(
-            [source_point], [np.asarray(target_point) - np.asarray(source_point)]
+            [source_point],
+            [np.asarray(target_point) - np.asarray(source_point)],
         )
         return is_intersect
 
@@ -488,7 +519,9 @@ class Generate2DHelper:
         return view2d
 
     def render_lesion_mask(self):
-        self.mesh_renderer.set_texture_image(self.texture_lesion_mask[:, :, np.newaxis])
+        self.mesh_renderer.set_texture_image(
+            self.texture_lesion_mask[:, :, np.newaxis]
+        )
         self.set_mask_parameters()
         mask2d = self.mesh_renderer.render_view(asnumpy=True, asRGB=True)
         lesion_mask = self.mesh_renderer.lesion_mask(
@@ -502,9 +535,13 @@ class Generate2DHelper:
 
     def render_nevi_square_mask(self):
         if self.bodytex is None:
-            raise ValueError("Error: cannot render nevi masks without `self.bodytex`.")
+            raise ValueError(
+                "Error: cannot render nevi masks without `self.bodytex`."
+            )
 
-        self.mesh_renderer.set_texture_image(self.texture_nevi_mask[:, :, np.newaxis])
+        self.mesh_renderer.set_texture_image(
+            self.texture_nevi_mask[:, :, np.newaxis]
+        )
         self.set_mask_parameters()
         mask2d = self.mesh_renderer.render_view(asnumpy=True, asRGB=True)
         nevi_square_mask = self.mesh_renderer.lesion_mask(
@@ -638,13 +675,15 @@ class Generate2DViews:
         new_params = []
         count_skip = 0
         img_count = 0  # Counts the number of images saved to disk
-        pbar = tqdm(total=self.num_img+1, desc="Rendering 2D views")
+        pbar = tqdm(total=self.num_img + 1, desc="Rendering 2D views")
         while img_count <= self.num_img:
             # keep rendering until num_img are rendered
             success = self.gen2d.randomize_parameters(config=self.config)
             if not success:
                 # Checks if the camera/lighting placement works for the random params.
-                print("***Camera and lighting placement not successful. Skipping")
+                print(
+                    "***Camera and lighting placement not successful. Skipping"
+                )
                 continue
             # Option to paste the lesion.
             paste_img, target = self.gen2d.render_image_and_target(
@@ -652,12 +691,16 @@ class Generate2DViews:
             )
             if paste_img is None:
                 # Checks if enough skin is visible.
-                print("***Not enough skin or unable to paste lesion. Skipping.")
+                print(
+                    "***Not enough skin or unable to paste lesion. Skipping."
+                )
                 continue
             target_name = self.synth_ds.generate_target_name()
 
             # Save image and masks to disk.
-            self.synth_ds.save_image(target_name, (paste_img * 255).astype(np.uint8))
+            self.synth_ds.save_image(
+                target_name, (paste_img * 255).astype(np.uint8)
+            )
             self.synth_ds.save_target(target_name, target)
 
             # not saving depth for now

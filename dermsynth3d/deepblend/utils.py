@@ -12,7 +12,10 @@ def single_channel_to_rgb_tensor(x, gpu_id=0):
     """
     x_tensor = numpy2tensor(x, gpu_id=gpu_id)
     x_rgb = (
-        x_tensor.squeeze(0).repeat(3, 1).view(3, x.shape[0], x.shape[1]).unsqueeze(0)
+        x_tensor.squeeze(0)
+        .repeat(3, 1)
+        .view(3, x.shape[0], x.shape[1])
+        .unsqueeze(0)
     )
 
     return x_rgb
@@ -31,8 +34,12 @@ def make_canvas_mask(x_start, y_start, target_size, mask):
     """
     canvas_mask = np.zeros(target_size)
     canvas_mask[
-        int(x_start - mask.shape[0] * 0.5) : int(x_start + mask.shape[0] * 0.5),
-        int(y_start - mask.shape[1] * 0.5) : int(y_start + mask.shape[1] * 0.5),
+        int(x_start - mask.shape[0] * 0.5) : int(
+            x_start + mask.shape[0] * 0.5
+        ),
+        int(y_start - mask.shape[1] * 0.5) : int(
+            y_start + mask.shape[1] * 0.5
+        ),
     ] = mask
     return canvas_mask
 
@@ -78,7 +85,11 @@ def laplacian_filter_tensor(img_tensor, gpu_id):
         1, 1, kernel_size=3, stride=1, padding=1, bias=False
     )
     laplacian_conv.weight = torch.nn.Parameter(
-        torch.from_numpy(laplacian_filter).float().unsqueeze(0).unsqueeze(0).to(gpu_id)
+        torch.from_numpy(laplacian_filter)
+        .float()
+        .unsqueeze(0)
+        .unsqueeze(0)
+        .to(gpu_id)
     )
 
     for param in laplacian_conv.parameters():
@@ -94,7 +105,9 @@ def laplacian_filter_tensor(img_tensor, gpu_id):
     return red_gradient_tensor, green_gradient_tensor, blue_gradient_tensor
 
 
-def compute_gt_gradient(x_start, y_start, source_img, target_img, mask, gpu_id):
+def compute_gt_gradient(
+    x_start, y_start, source_img, target_img, mask, gpu_id
+):
     # compute source image gradient
     source_img_tensor = (
         torch.from_numpy(source_img)
@@ -176,7 +189,9 @@ def compute_gt_gradient(x_start, y_start, source_img, target_img, mask, gpu_id):
 
     # background gradient
     red_background_gradient = red_target_gradient * (canvas_mask - 1) * (-1)
-    green_background_gradient = green_target_gradient * (canvas_mask - 1) * (-1)
+    green_background_gradient = (
+        green_target_gradient * (canvas_mask - 1) * (-1)
+    )
     blue_background_gradient = blue_target_gradient * (canvas_mask - 1) * (-1)
 
     # add up foreground and background gradient
@@ -227,13 +242,17 @@ def hist_match_pytorch(source, template):
     if hist_step == 0:
         return source.reshape(oldshape)
 
-    hist_bin_centers = torch.arange(start=min_val, end=max_val, step=hist_step).to(
-        source.device
-    )
+    hist_bin_centers = torch.arange(
+        start=min_val, end=max_val, step=hist_step
+    ).to(source.device)
     hist_bin_centers = hist_bin_centers + hist_step / 2.0
 
-    source_hist = torch.histc(input=source, min=min_val, max=max_val, bins=num_bins)
-    template_hist = torch.histc(input=template, min=min_val, max=max_val, bins=num_bins)
+    source_hist = torch.histc(
+        input=source, min=min_val, max=max_val, bins=num_bins
+    )
+    template_hist = torch.histc(
+        input=template, min=min_val, max=max_val, bins=num_bins
+    )
 
     source_quantiles = torch.cumsum(input=source_hist, dim=0)
     source_quantiles = source_quantiles / source_quantiles[-1]
@@ -253,7 +272,11 @@ def hist_match_pytorch(source, template):
         input=torch.round(source / hist_step), min=0, max=num_bins - 1
     ).long()
 
-    mapped_indices = torch.gather(input=nearest_indices, dim=0, index=source_bin_index)
-    matched_source = torch.gather(input=hist_bin_centers, dim=0, index=mapped_indices)
+    mapped_indices = torch.gather(
+        input=nearest_indices, dim=0, index=source_bin_index
+    )
+    matched_source = torch.gather(
+        input=hist_bin_centers, dim=0, index=mapped_indices
+    )
 
     return matched_source.reshape(oldshape)

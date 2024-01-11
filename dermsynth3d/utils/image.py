@@ -54,7 +54,9 @@ def uint8_to_float32(x):
         raise ValueError("Expects dtype=uint8")
 
     if x.max() <= 1:
-        raise ValueError("Error: x.max() <= 1, are you sure you want to convert?")
+        raise ValueError(
+            "Error: x.max() <= 1, are you sure you want to convert?"
+        )
 
     return (x / 255).astype(np.float32)
 

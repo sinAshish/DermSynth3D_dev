@@ -83,7 +83,10 @@ class ImageDataset:
         return os.path.join(self.dir_depth, image_id + self.image_extension)
 
     def image(
-        self, image_id: str, img_size: Optional[tuple] = None, resample=Image.BILINEAR
+        self,
+        image_id: str,
+        img_size: Optional[tuple] = None,
+        resample=Image.BILINEAR,
     ):
         """Returns a PIL image for the given `image_id`.
 
@@ -110,7 +113,9 @@ class ImageDataset:
         return load_image(self.target_filepath(image_id), img_size)
 
     def prediction_filepath(self, image_id):
-        return os.path.join(self.dir_predictions, image_id + self.target_extension)
+        return os.path.join(
+            self.dir_predictions, image_id + self.target_extension
+        )
 
     def prediction(self, image_id):
         return load_image(self.prediction_filepath(image_id))
@@ -410,7 +415,9 @@ class FitzDataset(ImageDataset):
         return os.path.join(self.dir_annotations, image_id + ".csv")
 
     def selected_lesion_filepath(self, image_id):
-        return os.path.join(self.dir_annotations, image_id, "selected_lesion.png")
+        return os.path.join(
+            self.dir_annotations, image_id, "selected_lesion.png"
+        )
 
     def lesions_filepath(self, image_id):
         return os.path.join(self.dir_annotations, image_id, "lesions.png")
@@ -453,7 +460,9 @@ class FitzDataset(ImageDataset):
     def poly_shapes(self, image_id: str):
         shape_dict = self.poly_dict(image_id)
 
-        poly = poly_from_xy(shape_dict["all_points_x"], shape_dict["all_points_y"])
+        poly = poly_from_xy(
+            shape_dict["all_points_x"], shape_dict["all_points_y"]
+        )
 
         return poly
 
@@ -474,7 +483,9 @@ class FitzDataset(ImageDataset):
     def contour_image(self, image_id: str):
         img = self.image(image_id)
         poly = self.poly_shapes(image_id)
-        out = cv2.drawContours(np.asarray(img), [np.asarray(poly)], -1, (0, 255, 0), 3)
+        out = cv2.drawContours(
+            np.asarray(img), [np.asarray(poly)], -1, (0, 255, 0), 3
+        )
         return out
 
     def shape_mask(self, image_id: str):
@@ -673,7 +684,9 @@ class Fitz17KAnnotations(ImageDataset):
             file_id = folder_file_id.split("/")[1]
             self.file_ids_folders[file_id] = folder_file_id
 
-        file_ids = [folder_file_id.split("/")[1] for folder_file_id in self.folder_ids]
+        file_ids = [
+            folder_file_id.split("/")[1] for folder_file_id in self.folder_ids
+        ]
         # IDs of the annotations with selected lesions that pass
         # the blending criteria. These IDs can be used for blending.
         self.annotation_ids = self.selected_lesion_ids(file_ids)
@@ -708,7 +721,9 @@ class Fitz17KAnnotations(ImageDataset):
     def selected_lesion_filepath(self, image_id):
         folder_file_id = self.file_ids_folders[image_id]
         return os.path.join(
-            self.dir_targets, folder_file_id, "selected_lesion" + self.target_extension
+            self.dir_targets,
+            folder_file_id,
+            "selected_lesion" + self.target_extension,
         )
 
     def mask(self, filepath, img_size=None):
@@ -738,7 +753,9 @@ class Fitz17KAnnotations(ImageDataset):
         lesions = np.asarray(self.lesions(image_id)) > 0
         nonskin = np.asarray(self.nonskin(image_id)) > 0
         healthy_skin = ~nonskin & ~lesions
-        mask = np.zeros(shape=(lesions.shape[0], lesions.shape[1], 3), dtype=np.float32)
+        mask = np.zeros(
+            shape=(lesions.shape[0], lesions.shape[1], 3), dtype=np.float32
+        )
         mask[:, :, Target.LESION] = lesions * 1
         mask[:, :, Target.SKIN] = healthy_skin * 1
         mask[:, :, Target.NONSKIN] = nonskin * 1
@@ -779,7 +796,9 @@ class Fitz17KAnnotations(ImageDataset):
 
 class DermoFit(ImageDataset):
     def file_ids(self) -> List[str]:
-        file_ids = [fname.split(".")[0] for fname in os.listdir(self.dir_images)]
+        file_ids = [
+            fname.split(".")[0] for fname in os.listdir(self.dir_images)
+        ]
 
         self.annotation_ids = []
         for file_id in file_ids:

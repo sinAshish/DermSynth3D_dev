@@ -10,13 +10,12 @@ sys.path.append(
 )
 sys.path.append(
     os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            os.path.pardir, "skin3d")
+        os.path.join(os.path.dirname(__file__), os.path.pardir, "skin3d")
     )
 )
 from dermsynth3d.utils.utils import yaml_loader
 from dermsynth3d import BlendLesions, Generate2DViews, SelectAndPaste
+
 # combine all yamls into one
 default = yaml_loader("configs/default.yaml")
 main = yaml_loader("configs/blend.yaml")
@@ -47,7 +46,11 @@ if __name__ == "__main__":
         help="number of iterations for blending",
     )
     parser.add_argument(
-        "--num_views", "-v", default=None, type=int, help="number of views to generate"
+        "--num_views",
+        "-v",
+        default=None,
+        type=int,
+        help="number of views to generate",
     )
     parser.add_argument(
         "--save_dir",
@@ -67,38 +70,37 @@ if __name__ == "__main__":
         "--paste", action="store_true", help="whether to force pasting or not"
     )
     parser.add_argument(
-            "--view_size",
-            "-vs",
-            default=512,
-            type=int,
-            help="size of the generated views",
-            )
+        "--view_size",
+        "-vs",
+        default=512,
+        type=int,
+        help="size of the generated views",
+    )
     parser.add_argument(
-            "--device",
-            "-d",
-            default=None,
-            type=str,
-            help="device to run the code on",
-            )
+        "--device",
+        "-d",
+        default=None,
+        type=str,
+        help="device to run the code on",
+    )
     parser.add_argument(
-            "--location",
-            "-l",
-            action="store_true",
-            help="whether to only run select_locations()", 
-            )
+        "--location",
+        "-l",
+        action="store_true",
+        help="whether to only run select_locations()",
+    )
     parser.add_argument(
-            "--blend",
-            "-b",
-            action="store_true",
-            help="whether to only run blend_lesions()", 
-            )
+        "--blend",
+        "-b",
+        action="store_true",
+        help="whether to only run blend_lesions()",
+    )
     parser.add_argument(
-            "--generate",
-            "-g",
-            action="store_true",
-            help="whether to only run synthesize_views()", 
-            )
-    
+        "--generate",
+        "-g",
+        action="store_true",
+        help="whether to only run synthesize_views()",
+    )
 
     args = parser.parse_args()
     args.view_size = str((args.view_size, args.view_size))
@@ -119,69 +121,88 @@ if __name__ == "__main__":
         else:
             raise ValueError("Invalid device: {}".format(args["device"]))
     else:
-       # Setup device
+        # Setup device
         if torch.cuda.is_available():
             device = torch.device("cuda:0")
             torch.cuda.set_device(device)
         else:
             device = torch.device("cpu")
- 
-    print ("*********************************")
-    print ("Running on device: {}".format(device))
-    print ("Running on mesh: {}".format(main["blending"]["mesh_name"]))
-    print ("*********************************\n")
+
+    print("*********************************")
+    print("Running on device: {}".format(device))
+    print("Running on mesh: {}".format(main["blending"]["mesh_name"]))
+    print("*********************************\n")
     if args["location"] and not args["blend"] and not args["generate"]:
-        print ("\nRunning only select_locations()")
-        print ("*********************************")
-        print (f"Looking for suitable locations to paste {main['blending']['num_paste']} lesions..")
+        print("\nRunning only select_locations()")
+        print("*********************************")
+        print(
+            f"Looking for suitable locations to paste {main['blending']['num_paste']} lesions.."
+        )
         locations = SelectAndPaste(config=main, device=device)
         locations.paste_on_locations()
-        print ("\nDone selecting locations...")
-        print ("*********************************\n")
+        print("\nDone selecting locations...")
+        print("*********************************\n")
         sys.exit()
     if args["blend"] and not args["location"] and not args["generate"]:
-        print ("\nRunning only blend_lesions()")
-        print ("*********************************")
-        print ("Blending lesions...")
-        print ("Blending for {} iterations".format(main["blending"]["num_iter"]))
-        print ("Blending with {} learning rate".format(main["blending"]["lr"]))
+        print("\nRunning only blend_lesions()")
+        print("*********************************")
+        print("Blending lesions...")
+        print(
+            "Blending for {} iterations".format(main["blending"]["num_iter"])
+        )
+        print("Blending with {} learning rate".format(main["blending"]["lr"]))
         blender = BlendLesions(config=main, device=device)
         blender.blend_lesions()
-        print ("\nDone blending lesions...")
-        print ("*********************************\n")
+        print("\nDone blending lesions...")
+        print("*********************************\n")
         sys.exit()
     if args["generate"] and not args["location"] and not args["blend"]:
-        print ("\nRunning only synthesize_views()")
-        print ("*********************************")
-        print ("Generating 2D views...")
-        print ("Generating {} views".format(main["generate"]["num_views"]))
-        print ("Generating views with {} skin threshold".format(main["generate"]["percent_skin"]))
-        print (f"Saving views at {main['generate']['save_dir']} with size {main['generate']['view_size']}")
+        print("\nRunning only synthesize_views()")
+        print("*********************************")
+        print("Generating 2D views...")
+        print("Generating {} views".format(main["generate"]["num_views"]))
+        print(
+            "Generating views with {} skin threshold".format(
+                main["generate"]["percent_skin"]
+            )
+        )
+        print(
+            f"Saving views at {main['generate']['save_dir']} with size {main['generate']['view_size']}"
+        )
         renderer = Generate2DViews(config=main, device=device)
         renderer.synthesize_views()
-        print ("\nDone for mesh: {}".format(main["blending"]["mesh_name"]))
-        print ("*********************************\n")
+        print("\nDone for mesh: {}".format(main["blending"]["mesh_name"]))
+        print("*********************************\n")
         exit()
-    
 
-    print ("*********************************")
-    print (f"\nLooking for suitable locations to paste {main['blending']['num_paste']} lesions..")
+    print("*********************************")
+    print(
+        f"\nLooking for suitable locations to paste {main['blending']['num_paste']} lesions.."
+    )
     locations = SelectAndPaste(config=main, device=device)
     locations.paste_on_locations()
-    print ("\nDone pasting lesions...")
-    print ("*********************************")
-    print ("\nBlending lesions...")
-    print ("Blending with {} iterations".format(main["blending"]["num_iter"]))
-    print ("Blending with {} learning rate".format(main["blending"]["lr"]))
+    print("\nDone pasting lesions...")
+    print("*********************************")
+    print("\nBlending lesions...")
+    print("Blending with {} iterations".format(main["blending"]["num_iter"]))
+    print("Blending with {} learning rate".format(main["blending"]["lr"]))
     blender = BlendLesions(config=main, device=device)
     blender.blend_lesions()
-    print ("\nDone blending lesions...")
-    print (f"Saving texure maps with blended lesions at {main['blending']['tex_dir']}")
-    print ("*********************************")
-    print ("\nGenerating 2D views...")
-    print ("Generating {} views".format(main["generate"]["num_views"]))
-    print ("Generating views with {} skin threshold".format(main["generate"]["percent_skin"]))
-    print (f"Saving views at {main['generate']['save_dir']} with size {main['generate']['view_size']}")
+    print("\nDone blending lesions...")
+    print(
+        f"Saving texure maps with blended lesions at {main['blending']['tex_dir']}"
+    )
+    print("*********************************")
+    print("\nGenerating 2D views...")
+    print("Generating {} views".format(main["generate"]["num_views"]))
+    print(
+        "Generating views with {} skin threshold".format(
+            main["generate"]["percent_skin"]
+        )
+    )
+    print(
+        f"Saving views at {main['generate']['save_dir']} with size {main['generate']['view_size']}"
+    )
     renderer = Generate2DViews(config=main, device=device)
     renderer.synthesize_views()
-    print ("\nDone for mesh: {}".format(main["blending"]["mesh_name"]))
+    print("\nDone for mesh: {}".format(main["blending"]["mesh_name"]))

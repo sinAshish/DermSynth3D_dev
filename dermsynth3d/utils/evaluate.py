@@ -178,13 +178,19 @@ def binary_conf_mat(pred: np.array, gt: np.array) -> Tuple[int, int, int, int]:
 
 def _binary_conf_mat():
     """Tests `binary_conf_mat()`"""
-    out = binary_conf_mat(pred=np.asarray([True, False]), gt=np.asarray([True, False]))
+    out = binary_conf_mat(
+        pred=np.asarray([True, False]), gt=np.asarray([True, False])
+    )
     assert out == (1, 0, 1, 0), "Error in conf mat"
 
-    out = binary_conf_mat(pred=np.asarray([False, True]), gt=np.asarray([True, False]))
+    out = binary_conf_mat(
+        pred=np.asarray([False, True]), gt=np.asarray([True, False])
+    )
     assert out == (0, 1, 0, 1), "Error in conf mat"
 
-    out = binary_conf_mat(pred=np.asarray([True, True]), gt=np.asarray([True, True]))
+    out = binary_conf_mat(
+        pred=np.asarray([True, True]), gt=np.asarray([True, True])
+    )
     assert out == (2, 0, 0, 0), "Error in conf mat, out=" + str(out)
 
 

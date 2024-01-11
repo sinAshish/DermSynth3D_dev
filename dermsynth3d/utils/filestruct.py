@@ -113,9 +113,7 @@ class ArezouFolders(FolderStructure):
         pass
 
     def backgrounds(self):
-        return (
-            "../../../3DBlended/SyntheticData/Backgrounds/House_Room_Dataset/Bedroom/"
-        )
+        return "../../../3DBlended/SyntheticData/Backgrounds/House_Room_Dataset/Bedroom/"
 
     def bodytex_highres(self):
         return "../../../3DBodyTex/3dbodytex-1.1-highres/"

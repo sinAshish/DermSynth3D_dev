@@ -101,13 +101,18 @@ class BoundingBox:
             return (self._x, self._y, self._x2, self._y2)
 
     def getRelativeBoundingBox(self, imgSize=None):
-        if imgSize is None and self._width_img is None and self._height_img is None:
+        if (
+            imgSize is None
+            and self._width_img is None
+            and self._height_img is None
+        ):
             raise IOError(
                 "Parameter 'imgSize' is required. It is necessary to inform the image size."
             )
         if imgSize is not None:
             return convertToRelativeValues(
-                (imgSize[0], imgSize[1]), (self._x, self._x2, self._y, self._y2)
+                (imgSize[0], imgSize[1]),
+                (self._x, self._x2, self._y, self._y2),
             )
         else:
             return convertToRelativeValues(
