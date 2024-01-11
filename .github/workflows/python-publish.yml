@@ -15,9 +15,10 @@ jobs:
       matrix:
         os: [ubuntu-20.04, windows-2019]
         # support version based on: https://download.pytorch.org/whl/torch/
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
-        torch-version: [1.11.0, 1.12.0, 1.13.0, 2.0.0]
-        cuda-version: ['cu113', 'cu115', 'cu116', 'cu117', 'cu118']
+        python-version: ['3.8', '3.9', '3.10']
+        torch-version: [1.12.1, 1.13.1, 2.0.0]
+        cuda-version: ['cu113', 'cu116', 'cu117', 'cu118']
+        # pytorch3d-version: ["0.7.2", "0.7.3", "0.7.4"]
         exclude:
           - torch-version: 1.11.0
             python-version: '3.11'
@@ -81,7 +82,7 @@ jobs:
       - name: Upgrade pip
         run: |
           pip install --upgrade setuptools
-          pip install ninja
+          pip install ninja poetry
 
       - name: Free up disk space
         if: ${{ runner.os == 'Linux' }}
@@ -93,12 +94,17 @@ jobs:
         run: |
           bash .github/workflows/cuda/${{ runner.os }}.sh ${{ matrix.cuda-version }}
 
-      - name: Install PyTorch ${{ matrix.torch-version }}+${{ matrix.cuda-version }}
+      - name: Install PyTorch and Pytorch3d ${{ matrix.torch-version }}+${{ matrix.cuda-version }}
         run: |
           pip install torch==${{ matrix.torch-version }} --extra-index-url https://download.pytorch.org/whl/${{ matrix.cuda-version }}
           python -c "import torch; print('PyTorch:', torch.__version__)"
           python -c "import torch; print('CUDA:', torch.version.cuda)"
           python -c "import torch; print('CUDA Available:', torch.cuda.is_available())"
+          echo "Install Pytorch3d Now"
+          pip install fvcore iopath
+          pyt_version_str=$(python -c "import torch; print(torch.__version__.split('+')[0].replace('.', ''))")
+          version_str="py3$(python -c 'import sys; print(sys.version_info.minor)')_${{ matrix.cuda-version }}_pyt$pyt_version_str"
+          pip install pytorch3d -f "https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/$version_str/download.html"
 
       - name: Patch PyTorch static constexpr on Windows
         if: ${{ runner.os == 'Windows' }}
@@ -111,33 +117,28 @@ jobs:
       - name: Set version
         if: ${{ runner.os != 'macOS' }}
         run: |
-          VERSION=`sed -n 's/^__version__ = "\(.*\)"/\1/p' nerfacc/version.py`
+          VERSION=`sed -n 's/^__version__ = "\(.*\)"/\1/p' dermsynth3d/version.py`
           TORCH_VERSION=`echo "pt${{ matrix.torch-version }}" | sed "s/..$//" | sed "s/\.//g"`
           CUDA_VERSION=`echo ${{ matrix.cuda-version }}`
           echo "New version name: $VERSION+$TORCH_VERSION$CUDA_VERSION"
-          sed -i "s/$VERSION/$VERSION+$TORCH_VERSION$CUDA_VERSION/" nerfacc/version.py
+          sed -i "s/$VERSION/$VERSION+$TORCH_VERSION$CUDA_VERSION/" dermsynth3d/version.py
         shell:
           bash
 
-      - name: Install main package for CPU
-        if: ${{ matrix.cuda-version == 'cpu' }}
+      - name: Install Poetry
         run: |
-          BUILD_NO_CUDA=1 pip install .
-
-      - name: Build wheel
+          curl -sSL https://install.python-poetry.org | python3 -
+      
+      - name: Build wheel with Poetry
         run: |
-          pip install wheel
-          source .github/workflows/cuda/${{ runner.os }}-env.sh ${{ matrix.cuda-version }}
-          python setup.py bdist_wheel --dist-dir=dist
-        shell: bash  # `source` does not exist in windows powershell
+          poetry build
 
       - name: Test wheel
         run: |
           cd dist
           ls -lah
           pip install *.whl
-          python -c "import nerfacc; print('nerfacc:', nerfacc.__version__)"
-          cd ..
+          python -c "import dermsynth3d; print('dermsynth3d:', dermsynth3d.__version__)"
         shell: bash  # `ls -lah` does not exist in windows powershell
 
   #     - name: Configure AWS
