@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermSynth3D - Web Renderer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DermSynth3D: A Framework for generating Synthetic Dermatological Images</h1>
+            <p>
+                This web interface allows you to select a 3D body model and texture, preview it in 3D, and render synthetic 2D images with various annotations using PyTorch3D on the backend.
+            </p>
+        </header>
+
+        <main>
+            <div class="controls-and-preview">
+                <div class="controls-panel">
+                    <h2>1. Configuration</h2>
+                    <div class="control-group">
+                        <label for="mesh-select">Select Mesh:</label>
+                        <select id="mesh-select" name="mesh"></select>
+                    </div>
+                    <div class="control-group">
+                        <label for="texture-select">Select Texture:</label>
+                        <select id="texture-select" name="texture"></select>
+                    </div>
+                    <div class="control-group">
+                        <label for="lesion-select">Number of Lesions:</label>
+                        <select id="lesion-select" name="lesions">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                        </select>
+                    </div>
+                    <hr>
+                    <h2>2. Rendering Options</h2>
+                    <div class="control-group">
+                        <label for="view-slider">Number of Views to Render:</label>
+                        <input type="range" id="view-slider" name="views" min="2" max="32" value="4" step="2">
+                        <span id="view-count">4</span>
+                    </div>
+                    <div class="control-group">
+                        <input type="checkbox" id="randomize-check" name="randomize" checked>
+                        <label for="randomize-check">Randomize View Parameters</label>
+                    </div>
+                    <button id="render-btn">Render Views</button>
+                    <div id="status-message"></div>
+                </div>
+                <div class="preview-panel">
+                    <h2>3D Preview</h2>
+                    <div id="preview-canvas-container">
+                        <canvas id="preview-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="output-panel">
+                <h2>Rendered Outputs</h2>
+                <div class="tabs">
+                    <button class="tab-link active" onclick="openTab(event, 'rgb-tab')">RGB</button>
+                    <button class="tab-link" onclick="openTab(event, 'depth-tab')">Depth</button>
+                    <button class="tab-link" onclick="openTab(event, 'anatomy-tab')">Anatomy</button>
+                    <button class="tab-link" onclick="openTab(event, 'seg-tab')">Segmentation</button>
+                </div>
+
+                <div id="rgb-tab" class="tab-content" style="display: block;">
+                    <div id="rgb-gallery" class="gallery"></div>
+                </div>
+                <div id="depth-tab" class="tab-content">
+                    <div id="depth-gallery" class="gallery"></div>
+                </div>
+                <div id="anatomy-tab" class="tab-content">
+                    <div id="anatomy-gallery" class="gallery"></div>
+                </div>
+                <div id="seg-tab" class="tab-content">
+                    <div id="seg-gallery" class="gallery"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="/static/main.js"></script>
+</body>
+</html>

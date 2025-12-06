@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+websockets
+python-multipart
+httpx
+pandas
+torch
+scikit-image
+numpy
+Pillow
+pytorch3d
