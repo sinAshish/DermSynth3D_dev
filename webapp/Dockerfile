@@ -7,6 +7,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /webapp
 
+COPY . .
 # 2. Install system compilers required by Pytorch3D
 # We need git to fetch the repo and gcc/g++ to compile the C++ extensions
 RUN apt-get update && apt-get install -y \
