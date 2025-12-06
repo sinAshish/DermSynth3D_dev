@@ -1,17 +1,18 @@
-# 1. Use Python 3.10
+# 1. Use Python 3.10 (Required for Pytorch3D compatibility)
 FROM python:3.10-slim
 
 # 2. Install 'uv'
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# 3. Set up a virtual environment
+# 3. Set up a virtual environment in /opt/venv
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN uv venv /opt/venv
 
-WORKDIR /webapp
+# 4. Use /app as the working directory (Avoids confusion with 'webapp' folder)
+WORKDIR /app
 
-# 4. Install system compilers (Required for Pytorch3D)
+# 5. Install system compilers (Git + GCC + G++)
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
@@ -19,19 +20,16 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. STEP 1: Install Build Tools (From standard PyPI)
-# We install these first so they are available for the next steps.
+# 6. STEP 1: Install Build Tools (Standard PyPI)
 RUN uv pip install setuptools wheel
 
-# 6. STEP 2: Install PyTorch (From PyTorch CPU Repo)
-# We do this separately so we can target the CPU index without breaking other packages
+# 7. STEP 2: Install PyTorch (CPU Index)
 RUN uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# 7. STEP 3: Install Pytorch3D
-# We use --no-build-isolation so it uses the 'torch' and 'setuptools' we just installed
+# 8. STEP 3: Install Pytorch3D
 RUN uv pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
 
-# 8. STEP 4: Install the rest of your stack (From standard PyPI)
+# 9. STEP 4: Install remaining dependencies
 RUN uv pip install \
     fastapi \
     uvicorn \
@@ -48,8 +46,20 @@ RUN uv pip install \
     scikit-image \
     numpy
 
-# 9. Copy your app code
-COPY . .
+# 10. CRITICAL: Copy the ENTIRE repository root to /app
+# This ensures 'dermsynth3d', 'skin3d', and 'webapp' are all present.
+COPY . /app
 
-# 10. Run the app
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 11. Fix Import Paths
+# Add /app (project root) and /app/skin3d to PYTHONPATH
+# This fixes "ModuleNotFoundError: No module named 'dermsynth3d'"
+ENV PYTHONPATH="/app:/app/skin3d:$PYTHONPATH"
+
+# 12. Run the App
+# We point to the location of main.py relative to the WORKDIR (/app).
+# Based on your logs, main.py seems to be in webapp/api/main.py or api/main.py.
+# If your main.py is in 'webapp/api/main.py', use this:
+CMD ["uvicorn", "webapp.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# IF your main.py is actually in the root (as per your tree structure), use this instead:
+# CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
