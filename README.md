@@ -12,9 +12,10 @@
 
 📢 DermSynth3D is now accepted to [MedIA](https://www.sciencedirect.com/science/article/pii/S1361841524000707) 🎉.
 
-<!--🤗**NEW** Try out the DermSynth3D web demo [here](https://huggingface.co/spaces/sinashish/DermSynth3D): [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-yellow?style=flat-square)](https://huggingface.co/spaces/sinashish/DermSynth3D)-->
+
 🤗**NEW** Try out the DermSynth3D web demo [here](https://tops-correctly-cub.ngrok-free.app/).
-<!--: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-yellow?style=flat-square)](https://tops-correctly-cub.ngrok-free.app/)-->
+
+:tada: **NEW** To setup the webapp locally, follow the instructions [here](https://tops-correctly-cub.ngrok-free.app/).
 
 <a href="https://www.cs.sfu.ca/~hamarneh/ecopy/media2024.pdf">
 <img src="assets/thumbnail1.png" alt="PDF thumbnail" height=auto width="100%">
@@ -74,6 +75,7 @@ DermSynth3D/
     - [Installation](#installation)
       - [using conda](#using-conda)
       - [using Docker](#using-docker)
+      - [Local Webapp](#local-app)
   - [Datasets](#datasets)
     - [The folder structure of data directory should be as follows:](#the-folder-structure-of-data-directory-should-be-as-follows)
     - [Data for Blending](#data-for-blending)
@@ -143,6 +145,20 @@ docker run --gpus all -it --user=root --runtime=nvidia --rm -v /path/to/download
 
 If you face any issues installing pytorch3d, please refer to their [installation guide](https://github.com/facebookresearch/pytorch3d/blob/main/INSTALL.md) or this issue [link](https://github.com/facebookresearch/pytorch3d/issues/1076).
 
+
+<a name="local-app"></a>
+
+### Web App
+
+You can quickly try the framework locally as well by setting up the webapp on your own workstation.
+
+I use [uv](https://docs.astral.sh/uv/getting-started/installation/) for managing the dependencies.
+```bash
+# to download uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# cd webapp
+uv run uvicorn api.main:app --reload 
+```
 
 <a name="data"></a>
 
