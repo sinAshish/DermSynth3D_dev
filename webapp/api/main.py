@@ -40,7 +40,7 @@ DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Data paths - using ../data/ relative to api directory
 DATA_DIR = os.path.join(PROJECT_ROOT_ABS, "data")
 # use data from github repo
-DATA_DIR = "https://github.com/sinashish/DermSynth3D_dev/raw/main/data"
+# DATA_DIR = "https://github.com/sinashish/DermSynth3D_dev/raw/main/data"
 
 BODYTEX_HIGHRES_DIR = os.path.join(DATA_DIR, "3dbodytex-1.1-highres")
 PROCESSED_TEXTURES_DIR = os.path.join(DATA_DIR, "processed_textures")
