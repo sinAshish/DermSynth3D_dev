@@ -5,6 +5,7 @@ __pycache__/
 .github/ISSUE_TEMPLATE/
 *.py[cod]
 *$py.class
+data/hf_demo
 
 # C extensions
 *.so
