@@ -1,15 +1,18 @@
-# Use Python 3.10 (Stable for ML)
-FROM python:3.12-slim
+# 1. Use Python 3.10 (Crucial for Pytorch3D compatibility)
+FROM python:3.10-slim
 
-# 1. Install 'uv' by copying the binary from the official image
-# This is the Docker best-practice for installing uv
+# 2. Install 'uv'
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-COPY . .
+
+# 3. Set up a virtual environment and put it in the PATH
+# This ensures all subsequent 'uv pip install' commands land in the same place
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN uv venv /opt/venv
 
 WORKDIR /webapp
 
-# 2. Install system compilers required by Pytorch3D
-# We need git to fetch the repo and gcc/g++ to compile the C++ extensions
+# 4. Install system compilers (Git + GCC + G++)
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
@@ -17,35 +20,41 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-RUN uv add fastapi gdown albumentations matplotlib pandas opencv-python websockets trimesh rtree
-RUN uv add uvicorn scipy scikit-learn scikit-image 
-RUN uv add numpy 
-RUN uv add torch torchvision
-RUN uv add "pytorch3d @ git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
+# 5. STEP 1: Install PyTorch (CPU version) explicitly FIRST
+# We use the CPU version to keep the image size small for Render
+# We DO NOT install pytorch3d yet.
+RUN uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# RUN uv sync --no-build-isolation
+# 6. STEP 2: Install Pytorch3D with --no-build-isolation
+# This tells uv: "Don't create a clean env. Use the environment where I just installed Torch."
+RUN uv pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
 
+# 7. STEP 3: Install the rest of your stack
+# Note: We use 'uv pip install' instead of 'uv add'
+RUN uv pip install \
+    fastapi \
+    uvicorn \
+    gdown \
+    albumentations \
+    matplotlib \
+    pandas \
+    opencv-python-headless \
+    websockets \
+    trimesh \
+    rtree \
+    scipy \
+    scikit-learn \
+    scikit-image \
+    numpy
+
+# 8. Copy your app code
+COPY . .
+
+# 9. (Optional) Handle your data download
+# If you have the tar file locally, copy it. If not, un-comment the gdown line.
 # RUN uv run gdown 15dEeF3H5uJSPvyod44wLH9ZRKJdrV5Oc
+# RUN tar -xvf data.tar.xz -C ../data
 
-RUN tar -xvf data.tar.xz -C ../data
-# 3. Install PyTorch CPU version first using uv
-# We use '--system' to install into the container's global Python environment
-# We install this separately so it is available when Pytorch3D tries to compile
-# RUN uv pip install --system --no-cache torch torchvision --index-url https://download.pytorch.org/whl/cpu
-
-# 4. Install Pytorch3D directly from source
-# This will now succeed because 'torch' is already installed from the step above
-# RUN uv pip install --system --no-cache "git+https://github.com/facebookresearch/pytorch3d.git@stable"
-
-# 5. Install remaining dependencies
-# COPY requirements.txt .
-# IMPORTANT: Ensure 'torch' and 'pytorch3d' are REMOVED from requirements.txt
-# to prevent uv from trying to reinstall or downgrade them.
-# RUN uv pip install --system --no-cache -r requirements.txt
-
-# 6. Copy application code
-# COPY . .
-
-# 7. Start the application
-# Adjust "api.index:app" if your main FastAPI instance is located elsewhere
-CMD ["uv", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 10. Run the app
+# Note: 'uvicorn' is now in the path, so we don't need 'uv run' prefix
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
