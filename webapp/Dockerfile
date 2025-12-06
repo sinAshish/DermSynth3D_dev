@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-RUN uv sync
+RUN uv sync --no-build-isolation
 
 RUN uv run gdown 15dEeF3H5uJSPvyod44wLH9ZRKJdrV5Oc
 
