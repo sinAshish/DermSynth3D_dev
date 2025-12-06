@@ -48,7 +48,7 @@ ANATOMY_LABELS_DIR = os.path.join(DATA_DIR, "bodytex_anatomy_labels")
 
 # --- Helper to load ID to Name Map ---
 def _load_id_to_name_map():
-    bodytex_csv_path = os.path.join(PROJECT_ROOT_ABS, "skin3d/data/3dbodytex-1.1-highres/bodytex.csv")
+    bodytex_csv_path = os.path.join(BODYTEX_HIGHRES_DIR, "bodytex.csv")
     if not os.path.exists(bodytex_csv_path):
         print(f"Warning: bodytex.csv not found at {bodytex_csv_path}. Mesh filtering might be incomplete.")
         return {}

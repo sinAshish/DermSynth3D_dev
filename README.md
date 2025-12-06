@@ -156,7 +156,9 @@ I use [uv](https://docs.astral.sh/uv/getting-started/installation/) for managing
 ```bash
 # to download uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
-# cd webapp
+# run the webapp from inside webapp/
+# uv will auto-update the dependencies based on uv.lock
+cd webapp
 uv run uvicorn api.main:app --reload 
 ```
 

@@ -10,6 +10,7 @@ dependencies = [
     "fastapi>=0.123.8",
     "httpx>=0.28.1",
     "ipython>=8.18.1",
+    "matplotlib>=3.9.4",
     "ninja>=1.13.0",
     "nupy>=0.1.1",
     "opencv-python>=4.12.0.88",
