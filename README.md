@@ -15,7 +15,7 @@
 
 🤗**NEW** Try out the DermSynth3D web demo [here](https://tops-correctly-cub.ngrok-free.app/).
 
-:tada: **NEW** To setup the webapp locally, follow the instructions [here](https://tops-correctly-cub.ngrok-free.app/).
+:tada: **NEW** To setup the webapp locally, follow the instructions [here](#local-app).
 
 <a href="https://www.cs.sfu.ca/~hamarneh/ecopy/media2024.pdf">
 <img src="assets/thumbnail1.png" alt="PDF thumbnail" height=auto width="100%">
