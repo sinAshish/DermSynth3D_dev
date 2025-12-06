@@ -39,6 +39,9 @@ app.add_middleware(
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 # Data paths - using ../data/ relative to api directory
 DATA_DIR = os.path.join(PROJECT_ROOT_ABS, "data")
+# use data from github repo
+DATA_DIR = "https://github.com/sinashish/DermSynth3D_dev/raw/main/data"
+
 BODYTEX_HIGHRES_DIR = os.path.join(DATA_DIR, "3dbodytex-1.1-highres")
 PROCESSED_TEXTURES_DIR = os.path.join(DATA_DIR, "processed_textures")
 ANATOMY_LABELS_DIR = os.path.join(DATA_DIR, "bodytex_anatomy_labels")
@@ -61,7 +64,6 @@ COLOR_LABELS = {
     6: (140., 86., 75.), 7: (255., 152., 150.),
 }
 
-# Copied from gradio_app.py
 def to_simple_anatomy(anatomy):
     for i in range(16+1):
         if i in [0,1]:
