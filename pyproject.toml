@@ -23,5 +23,8 @@ dependencies = [
     "websockets>=15.0.1",
 ]
 
+[tool.uv.extra-build-dependencies]
+pytorch3d = ["torch"]
+
 [tool.uv.sources]
 pytorch3d = { git = "https://github.com/facebookresearch/pytorch3d.git", rev = "stable" }
