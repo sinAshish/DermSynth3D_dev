@@ -4,10 +4,10 @@ FROM python:3.12-slim
 # 1. Install 'uv' by copying the binary from the official image
 # This is the Docker best-practice for installing uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY . .
 
 WORKDIR /webapp
 
-COPY . .
 # 2. Install system compilers required by Pytorch3D
 # We need git to fetch the repo and gcc/g++ to compile the C++ extensions
 RUN apt-get update && apt-get install -y \
@@ -17,9 +17,15 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-RUN uv sync --no-build-isolation
+RUN uv add fastapi gdown albumentations matplotlib pandas opencv-python websockets trimesh rtree
+RUN uv add uvicorn scipy scikit-learn scikit-image 
+RUN uv add numpy 
+RUN uv add torch torchvision
+RUN uv add "pytorch3d @ git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
 
-RUN uv run gdown 15dEeF3H5uJSPvyod44wLH9ZRKJdrV5Oc
+# RUN uv sync --no-build-isolation
+
+# RUN uv run gdown 15dEeF3H5uJSPvyod44wLH9ZRKJdrV5Oc
 
 RUN tar -xvf data.tar.xz -C ../data
 # 3. Install PyTorch CPU version first using uv
@@ -38,7 +44,7 @@ RUN tar -xvf data.tar.xz -C ../data
 # RUN uv pip install --system --no-cache -r requirements.txt
 
 # 6. Copy application code
-COPY . .
+# COPY . .
 
 # 7. Start the application
 # Adjust "api.index:app" if your main FastAPI instance is located elsewhere
