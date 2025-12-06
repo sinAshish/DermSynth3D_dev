@@ -4,7 +4,11 @@
     {
       "src": "api/main.py",
       "use": "@vercel/python",
-      "config": { "maxLambdaSize": "250mb", "runtime": "python3.9" }
+      "config": {
+        "maxLambdaSize": "250mb",
+        "runtime": "python3.9",
+        "buildCommand": "gdown '15dEeF3H5uJSPvyod44wLH9ZRKJdrV5Oc' -O data.tar.gz && tar -xzf data.tar.gz -C ../"
+      }
     },
     {
       "src": "static/**",
@@ -20,5 +24,8 @@
       "src": "/(.*)",
       "dest": "static/$1"
     }
-  ]
+  ],
+  "env": {
+    "VERCEL_PYTHON_INSTALL_COMMAND": "pip install uv gdown && uv sync --system --python python3.9"
+  }
 }
