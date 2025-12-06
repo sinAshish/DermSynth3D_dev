@@ -1,18 +1,17 @@
-# 1. Use Python 3.10 (Crucial for Pytorch3D compatibility)
+# 1. Use Python 3.10
 FROM python:3.10-slim
 
 # 2. Install 'uv'
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# 3. Set up a virtual environment and put it in the PATH
-# This ensures all subsequent 'uv pip install' commands land in the same place
+# 3. Set up a virtual environment
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN uv venv /opt/venv
 
 WORKDIR /webapp
 
-# 4. Install system compilers (Git + GCC + G++)
+# 4. Install system compilers (Required for Pytorch3D)
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
@@ -20,17 +19,21 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. STEP 1: Install PyTorch (CPU version) explicitly FIRST
-# We use the CPU version to keep the image size small for Render
-# We DO NOT install pytorch3d yet.
-RUN uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# 5. STEP 1: Install Torch AND Build Tools
+# We MUST install 'setuptools' and 'wheel' here because --no-build-isolation
+# relies on them being present in the environment.
+RUN uv pip install \
+    torch \
+    torchvision \
+    setuptools \
+    wheel \
+    --index-url https://download.pytorch.org/whl/cpu
 
-# 6. STEP 2: Install Pytorch3D with --no-build-isolation
-# This tells uv: "Don't create a clean env. Use the environment where I just installed Torch."
+# 6. STEP 2: Install Pytorch3D
+# Now this works because 'torch' AND 'setuptools' are already installed.
 RUN uv pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
 
 # 7. STEP 3: Install the rest of your stack
-# Note: We use 'uv pip install' instead of 'uv add'
 RUN uv pip install \
     fastapi \
     uvicorn \
@@ -50,11 +53,5 @@ RUN uv pip install \
 # 8. Copy your app code
 COPY . .
 
-# 9. (Optional) Handle your data download
-# If you have the tar file locally, copy it. If not, un-comment the gdown line.
-# RUN uv run gdown 15dEeF3H5uJSPvyod44wLH9ZRKJdrV5Oc
-# RUN tar -xvf data.tar.xz -C ../data
-
-# 10. Run the app
-# Note: 'uvicorn' is now in the path, so we don't need 'uv run' prefix
+# 9. Run the app
 CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
