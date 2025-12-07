@@ -63,4 +63,4 @@ WORKDIR /app/webapp
 
 # 11. Run the application
 # Now we use 'api.main:app' because we are inside the webapp folder
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "api.main:app", "--reload", "--host", "0.0.0.0", "--port", "10000"]
