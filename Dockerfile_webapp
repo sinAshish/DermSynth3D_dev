@@ -63,14 +63,15 @@ RUN uv pip install setuptools wheel
 
 # B. PyTorch (CUDA Version this time, since we have the base image!)
 # Note: Pytorch3D compilation requires the CUDA version of torch matching the NVCC version
-RUN uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+RUN uv pip install torch torchvision 
+#--index-url https://download.pytorch.org/whl/cpu
 
 # C. Pytorch3D Build Dependencies
 RUN uv pip install fvcore iopath portalocker
 
 # D. Install Pytorch3D (Compiling with CUDA support)
 # We set FORCE_CUDA=1 so it uses the NVCC from the base image
-ENV FORCE_CUDA=1
+# ENV FORCE_CUDA=1
 RUN uv pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
 
 # E. Install App Dependencies
