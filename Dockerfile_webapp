@@ -52,7 +52,8 @@ USER $USER:$GID
 
 # 4. Install 'uv' via the standalone script
 # We point it to /bin to make it available globally immediately
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # copy everything to workdir 
 COPY . /app
