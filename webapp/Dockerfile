@@ -9,9 +9,10 @@ ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN uv venv /opt/venv
 
+# 4. Set WORKDIR to Root first to copy everything
 WORKDIR /app
 
-# 4. Install system compilers
+# 5. Install system compilers
 RUN apt-get update && apt-get install -y \
     git \
     build-essential \
@@ -19,7 +20,10 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# 5. Install dependencies (Split steps for reliability)
+# 6. Install dependencies
+# Note: We assume requirements files are copied with the rest of the repo below,
+# OR you can copy them explicitly here if you prefer.
+# For now, we install packages directly to be safe.
 RUN uv pip install setuptools wheel
 RUN uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 RUN uv pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
@@ -40,20 +44,23 @@ RUN uv pip install \
     scikit-image \
     numpy
 
-# 6. CRITICAL: Copy the ENTIRE repository root to /app
-# Because the Dockerfile is now in the root, this copies 'dermsynth3d' AND 'webapp'
+# 7. COPY THE ROOT REPO
+# This copies 'dermsynth3d', 'webapp', etc. into /app
 COPY . /app
 
-# 7. Create missing __init__.py files so Python treats folders as packages
-# We use 'mkdir -p' to guarantee the path exists before touching files
+# 8. Create __init__.py files
+# Ensure 'api' is treated as a package
 RUN mkdir -p /app/webapp/api && \
-    touch /app/webapp/__init__.py && \
     touch /app/webapp/api/__init__.py
 
-# 8. Set Python Path to include root and submodules
-# This ensures 'dermsynth3d' is found regardless of where the script runs
+# 9. Set PYTHONPATH
+# We add /app so that 'dermsynth3d' (located at /app/dermsynth3d) can be found
 ENV PYTHONPATH="/app:/app/skin3d:$PYTHONPATH"
 
-# 9. Run the application
-# We point to the module path inside the 'webapp' package
-CMD ["uvicorn", "webapp.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 10. CRITICAL CHANGE: Switch directory to 'webapp'
+# This replicates your local setup.
+WORKDIR /app/webapp
+
+# 11. Run the application
+# Now we use 'api.main:app' because we are inside the webapp folder
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
