@@ -51,12 +51,15 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # 5. Setup /app directory with correct permissions
 # We create it as root, then give ownership to the developer user
+COPY . /app
 WORKDIR /app
 RUN chown $USER:$GID /app
 # 6. Switch to non-root user
 USER $USER
+
 # pin the python version
 RUN uv python pin 3.12
+
 
 # sync the lock file
 RUN uv sync --no-build-isolation
