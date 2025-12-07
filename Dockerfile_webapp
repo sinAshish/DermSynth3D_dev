@@ -10,6 +10,9 @@ ARG GID=1000
 ARG USER=developer
 ARG GROUP=$USER
 
+ENV PYTHONUNBUFFERED=1
+ENV UV_PYTHON_DOWNLOADS=auto
+
 ENV FORCE_CUDA=1
 RUN echo $(nvcc --version)
 
@@ -59,6 +62,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY . /app
 
 WORKDIR /app
+RUN chown $USER:$GID /app
 
 # pin the python version
 RUN uv python pin 3.12
