@@ -1,0 +1,97 @@
+# 1. Use Full Python 3.10 (Best for system libraries)
+# FROM python:3.12
+FROM nvidia/cuda:11.3.1-cudnn8-runtime-ubuntu20.04
+
+# 2. Set up environment variables
+# ENV VIRTUAL_ENV=/opt/venv
+# Add the virtual env AND the uv binary location to PATH
+# ENV PATH="$VIRTUAL_ENV/bin:/root/.local/bin:$PATH"
+
+# 3. Install system compilers AND 'curl' (required for the installer)
+# WORKDIR /app
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    build-essential \
+    gcc \
+    g++ \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. Install 'uv' via the standalone script
+# We point it to /bin to make it available globally immediately
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# copy everything to workdir 
+COPY . /app
+
+WORKDIR /app
+
+# pin the python version
+RUN uv python pin 3.12
+
+# sync the lock file
+RUN uv sync --no-build-isolation
+
+
+
+# hopefully al the deps are downloaded
+
+
+# 6. Install Python Dependencies
+# A. Build Tools
+# RUN uv pip install setuptools wheel
+
+# B. PyTorch (CPU)
+# RUN uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+# C. Pytorch3D Dependencies (Critical for preventing import errors)
+# RUN uv pip install fvcore iopath portalocker
+
+# D. Pytorch3D
+# RUN uv pip install "git+https://github.com/facebookresearch/pytorch3d.git@stable" --no-build-isolation
+
+# E. App Dependencies
+# RUN uv pip install \
+#     fastapi \
+#     uvicorn \
+#     gdown \
+#     albumentations \
+#     matplotlib \
+#     pandas \
+#     opencv-python-headless \
+#     websockets \
+#     trimesh \
+#     rtree \
+#     scipy \
+#     scikit-learn \
+#     scikit-image \
+#     numpy
+
+# 7. COPY THE ROOT REPO
+# Ensure Render "Root Directory" is set to "." 
+# COPY . /app
+
+# 8. Fix Imports: Create __init__.py files
+# RUN mkdir -p /app/webapp/api && \
+#     touch /app/webapp/__init__.py && \
+#     touch /app/webapp/api/__init__.py
+
+# 9. Set PYTHONPATH to find 'dermsynth3d' in the root
+# ENV PYTHONPATH="/app:/app/skin3d:$PYTHONPATH"
+
+# 10. Switch context to the webapp folder
+WORKDIR /app/webapp
+
+
+# 11. Debug Start Command
+# This will print the exact import error if it still fails
+# CMD ["sh", "-c", "python -c 'from api import main; print(\"Import Successful!\")' && uvicorn api.main:app --host 0.0.0.0 --port 8000"]
+
+
+
+CMD ["uv", "run", "uvicorn", "api.main:app", "--reload", "--host", "0.0.0.0", "--port", "10000"]
