@@ -43,27 +43,18 @@ RUN --mount=type=cache,target=/var/cache/apt apt update && apt install -y --no-i
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN groupadd -g $GID $USER && \
+    useradd -m -u $UID -g $GID -s /bin/bash $USER
 
-## Create a non-root user and group
-RUN addgroup --gid $GID $GROUP
-RUN adduser --disabled-password --gecos '' --uid $UID --gid $GID $USER && \
-    adduser $USER sudo && \
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-# RUN useradd -D -mU ${USER} --uid=${UID}
-# Run as this user from now on
-USER $USER:$GID
-
-# 4. Install 'uv' via the standalone script
-# We point it to /bin to make it available globally immediately
-# RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+# 4. Install 'uv' globally
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# copy everything to workdir 
-COPY . /app
-
+# 5. Setup /app directory with correct permissions
+# We create it as root, then give ownership to the developer user
 WORKDIR /app
 RUN chown $USER:$GID /app
-
+# 6. Switch to non-root user
+USER $USER
 # pin the python version
 RUN uv python pin 3.12
 
